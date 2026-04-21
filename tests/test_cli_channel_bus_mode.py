@@ -5,7 +5,6 @@ from __future__ import annotations
 from types import SimpleNamespace
 
 import pytest
-
 from Rxscientist.cli import channel as channel_cli
 
 

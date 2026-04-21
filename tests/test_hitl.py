@@ -321,7 +321,6 @@ class TestInterruptEventParsing:
     def test_interrupt_from_updates_mode(self):
         """__interrupt__ in updates mode yields interrupt event."""
         from langchain_core.messages import AIMessageChunk
-
         from Rxscientist.stream.events import stream_agent_events
 
         mock_agent = MagicMock()

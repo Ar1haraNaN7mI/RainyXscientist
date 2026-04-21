@@ -21,7 +21,6 @@ from datetime import datetime
 from unittest.mock import AsyncMock, MagicMock
 
 import pytest
-
 from Rxscientist.channels.base import (
     Channel,
     ChannelError,

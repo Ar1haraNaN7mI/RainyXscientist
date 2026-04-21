@@ -1,7 +1,6 @@
 """Tests for _merge_memory — backslash-safe regex replacement."""
 
 import pytest
-
 from Rxscientist.middleware.memory import DEFAULT_MEMORY_TEMPLATE, _merge_memory
 
 

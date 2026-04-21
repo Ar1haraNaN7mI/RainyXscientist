@@ -8,11 +8,11 @@ thread to set a response via ``_set_channel_response()``.
 import asyncio
 
 import pytest
-
 from Rxscientist.channels.base import Channel, OutgoingMessage
 from Rxscientist.channels.bus.events import InboundMessage
 from Rxscientist.channels.bus.message_bus import MessageBus
 from Rxscientist.channels.channel_manager import ChannelManager
+
 from tests.conftest import run_async as _run
 
 

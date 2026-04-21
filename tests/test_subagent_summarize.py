@@ -14,7 +14,6 @@ from dataclasses import dataclass
 from unittest.mock import AsyncMock, MagicMock, patch
 
 from langchain_core.messages import AIMessageChunk
-
 from Rxscientist.channels.base import Channel
 from Rxscientist.channels.bus.events import InboundMessage as BusInbound
 from Rxscientist.channels.bus.message_bus import MessageBus
@@ -22,6 +21,7 @@ from Rxscientist.channels.channel_manager import ChannelManager
 from Rxscientist.channels.consumer import InboundConsumer, _join_subagent_text
 from Rxscientist.stream.emitter import StreamEvent, StreamEventEmitter
 from Rxscientist.stream.events import stream_agent_events
+
 from tests.conftest import run_async as _run
 
 # ═══════════════════════════════════════════════════════════════════

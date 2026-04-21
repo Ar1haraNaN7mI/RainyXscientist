@@ -4,7 +4,6 @@ import os
 from unittest.mock import MagicMock, patch
 
 import pytest
-
 from Rxscientist.ccproxy_manager import (
     check_ccproxy_auth,
     ensure_ccproxy,

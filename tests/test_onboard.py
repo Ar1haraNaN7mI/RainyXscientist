@@ -4,7 +4,6 @@ import subprocess
 from unittest.mock import Mock, patch
 
 import pytest
-
 from Rxscientist.config import RxscientistConfig
 from Rxscientist.config.onboard import (
     CONFIRM_STYLE,

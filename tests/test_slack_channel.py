@@ -1,9 +1,9 @@
 """Tests for Slack channel implementation."""
 
 import pytest
-
 from Rxscientist.channels.base import ChannelError
 from Rxscientist.channels.slack.channel import SlackChannel, SlackConfig
+
 from tests.conftest import run_async as _run
 
 

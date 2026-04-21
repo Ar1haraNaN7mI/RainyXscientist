@@ -5,7 +5,6 @@ import sys
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
-
 from Rxscientist.channels.base import ChannelError, OutboundMessage
 from Rxscientist.channels.feishu.channel import (
     FeishuChannel,
@@ -14,6 +13,7 @@ from Rxscientist.channels.feishu.channel import (
     _parse_inline_elements,
     _parse_inline_text,
 )
+
 from tests.conftest import run_async as _run
 
 

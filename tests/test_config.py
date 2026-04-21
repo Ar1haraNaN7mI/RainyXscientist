@@ -5,7 +5,6 @@ from pathlib import Path
 
 import pytest
 import yaml
-
 from Rxscientist.config import (
     RxscientistConfig,
     apply_config_to_env,

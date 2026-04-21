@@ -6,7 +6,6 @@ import time
 import xml.etree.ElementTree as ET
 
 import pytest
-
 from Rxscientist.channels.base import ChannelError
 from Rxscientist.channels.wechat.channel import (
     WeChatChannel,
@@ -20,6 +19,7 @@ from Rxscientist.channels.wechat.crypto import (
     _pkcs7_unpad,
     parse_xml,
 )
+
 from tests.conftest import run_async as _run
 
 # ── Config tests ──────────────────────────────────────────────────

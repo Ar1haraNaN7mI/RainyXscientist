@@ -10,8 +10,8 @@ from datetime import datetime
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
-
 from Rxscientist.stt import STT_MODELS, is_audio_file, transcribe_file
+
 from tests.conftest import run_async
 
 # ── is_audio_file ─────────────────────────────────────────────────────

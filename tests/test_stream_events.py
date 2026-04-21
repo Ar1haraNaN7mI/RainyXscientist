@@ -5,7 +5,6 @@ from types import SimpleNamespace
 from unittest.mock import AsyncMock, MagicMock
 
 from langchain_core.messages import AIMessageChunk
-
 from Rxscientist.stream.events import (
     _extract_summary_message_text,
     _extract_tool_content,

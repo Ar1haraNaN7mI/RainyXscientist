@@ -4,7 +4,6 @@ from pathlib import Path
 from unittest.mock import patch
 
 import pytest
-
 from Rxscientist.tools.skills_manager import (
     _is_github_url,
     _parse_github_url,

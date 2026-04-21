@@ -9,7 +9,6 @@ from unittest.mock import patch
 
 from langchain_core.messages import AIMessage, HumanMessage
 from langgraph.checkpoint.serde.jsonplus import JsonPlusSerializer
-
 from Rxscientist.sessions import (
     AGENT_NAME,
     _format_relative_time,
@@ -23,6 +22,7 @@ from Rxscientist.sessions import (
     list_threads,
     thread_exists,
 )
+
 from tests.conftest import run_async as _run
 
 

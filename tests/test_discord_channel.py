@@ -1,9 +1,9 @@
 """Tests for Discord channel implementation."""
 
 import pytest
-
 from Rxscientist.channels.base import ChannelError
 from Rxscientist.channels.discord.channel import DiscordChannel, DiscordConfig
+
 from tests.conftest import run_async as _run
 
 

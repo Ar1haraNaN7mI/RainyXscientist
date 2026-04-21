@@ -6,7 +6,6 @@ import pytest
 from langchain.agents.middleware.types import ModelRequest
 from langchain_core.exceptions import ContextOverflowError
 from langchain_core.messages import HumanMessage
-
 from Rxscientist.middleware.context_overflow import ContextOverflowMapperMiddleware
 
 

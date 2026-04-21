@@ -4,6 +4,7 @@ from unittest.mock import AsyncMock, MagicMock
 
 from Rxscientist.channels.base import OutboundMessage
 from Rxscientist.channels.qq.channel import QQChannel, QQConfig
+
 from tests.conftest import run_async as _run
 
 

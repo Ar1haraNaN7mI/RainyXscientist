@@ -3,7 +3,6 @@
 from unittest.mock import MagicMock, patch
 
 from langchain.agents.middleware import ContextEditingMiddleware
-
 from Rxscientist.middleware.context_editing import compute_context_editing_trigger
 
 # ---------------------------------------------------------------------------

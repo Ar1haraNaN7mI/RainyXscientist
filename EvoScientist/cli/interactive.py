@@ -8,6 +8,7 @@ import sys
 from datetime import datetime
 from typing import Any
 
+import Rxscientist.cli.channel as _ch_mod
 import typer  # type: ignore[import-untyped]
 from prompt_toolkit import PromptSession  # type: ignore[import-untyped]
 from prompt_toolkit.auto_suggest import (
@@ -27,8 +28,6 @@ from rich.markup import escape
 from rich.panel import Panel
 from rich.table import Table
 from rich.text import Text
-
-import Rxscientist.cli.channel as _ch_mod
 
 from ..sessions import (
     _format_relative_time,

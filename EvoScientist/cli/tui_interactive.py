@@ -15,10 +15,9 @@ from collections.abc import Callable
 from datetime import datetime
 from typing import Any, ClassVar
 
+import Rxscientist.cli.channel as _ch_mod
 from rich.console import Group
 from rich.text import Text
-
-import Rxscientist.cli.channel as _ch_mod
 
 from ..commands import CommandContext
 from ..commands import manager as cmd_manager

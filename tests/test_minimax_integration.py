@@ -10,7 +10,6 @@ Optionally set MINIMAX_BASE_URL to https://api.minimax.io/anthropic for Global k
 import os
 
 import pytest
-
 from Rxscientist.llm import get_chat_model
 
 pytestmark = pytest.mark.skipif(

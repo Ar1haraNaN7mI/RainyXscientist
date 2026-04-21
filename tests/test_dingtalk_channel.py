@@ -4,9 +4,9 @@ import json
 from unittest.mock import AsyncMock, MagicMock
 
 import pytest
-
 from Rxscientist.channels.base import ChannelError, OutboundMessage
 from Rxscientist.channels.dingtalk.channel import DingTalkChannel, DingTalkConfig
+
 from tests.conftest import run_async as _run
 
 

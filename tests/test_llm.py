@@ -3,7 +3,6 @@
 from unittest.mock import patch
 
 import pytest
-
 from Rxscientist.llm import (
     DEFAULT_MODEL,
     MODELS,
@@ -729,7 +728,6 @@ class TestPatchOpenAICompatContent:
 
     def test_generate_flattened(self):
         from langchain_core.messages import HumanMessage
-
         from Rxscientist.llm.patches import _patch_openai_compat_content
 
         model = self._make_model()
@@ -745,7 +743,6 @@ class TestPatchOpenAICompatContent:
     @pytest.mark.anyio
     async def test_agenerate_flattened(self):
         from langchain_core.messages import HumanMessage
-
         from Rxscientist.llm.patches import _patch_openai_compat_content
 
         model = self._make_model()
@@ -760,7 +757,6 @@ class TestPatchOpenAICompatContent:
 
     def test_stream_flattened(self):
         from langchain_core.messages import HumanMessage
-
         from Rxscientist.llm.patches import _patch_openai_compat_content
 
         model = self._make_model()
@@ -776,7 +772,6 @@ class TestPatchOpenAICompatContent:
     @pytest.mark.anyio
     async def test_astream_flattened(self):
         from langchain_core.messages import HumanMessage
-
         from Rxscientist.llm.patches import _patch_openai_compat_content
 
         model = self._make_model()

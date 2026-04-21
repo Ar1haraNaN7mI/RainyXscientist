@@ -7,7 +7,6 @@ from datetime import datetime, timedelta
 from typing import ClassVar
 
 from langchain_core.messages import HumanMessage
-
 from Rxscientist.cli.status_bar import (
     SessionStatusSnapshot,
     apply_assistant_text_to_snapshot,

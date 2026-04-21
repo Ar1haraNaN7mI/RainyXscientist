@@ -1,9 +1,9 @@
 """Tests for Telegram channel implementation."""
 
 import pytest
-
 from Rxscientist.channels.base import ChannelError
 from Rxscientist.channels.telegram.channel import TelegramChannel, TelegramConfig
+
 from tests.conftest import run_async as _run
 
 

@@ -5,7 +5,6 @@ from unittest.mock import MagicMock
 import pytest
 from langchain_core.messages import ToolMessage
 from langgraph.types import Command
-
 from Rxscientist.middleware.tool_error_handler import (
     ToolErrorHandlerMiddleware,
     _build_error_message,

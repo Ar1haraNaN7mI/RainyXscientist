@@ -5,7 +5,6 @@ from types import SimpleNamespace
 
 import pytest
 import yaml
-
 from Rxscientist.mcp.client import (
     _build_connections,
     _filter_tools,

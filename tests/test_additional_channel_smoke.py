@@ -1,7 +1,6 @@
 """Additional smoke tests for channels without dedicated suites."""
 
 import pytest
-
 from Rxscientist.channels.base import ChannelError, OutboundMessage
 from Rxscientist.channels.email.channel import EmailChannel, EmailConfig
 from Rxscientist.channels.imessage.channel_rpc import (
@@ -10,6 +9,7 @@ from Rxscientist.channels.imessage.channel_rpc import (
 )
 from Rxscientist.channels.qq.channel import QQChannel, QQConfig
 from Rxscientist.channels.signal.channel import SignalChannel, SignalConfig
+
 from tests.conftest import run_async as _run
 
 

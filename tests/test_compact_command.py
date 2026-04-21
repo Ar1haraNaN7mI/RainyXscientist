@@ -143,7 +143,6 @@ class TestCompactNegligibleSavings:
     def test_still_compacts_when_few_messages_but_high_tokens(self):
         """2 messages but they account for >2% of tokens — should compact."""
         from langchain_core.messages import HumanMessage
-
         from Rxscientist.cli.commands import compact_conversation
 
         agent = MagicMock()
@@ -243,7 +242,6 @@ class TestCompactSuccess:
 
     def test_successful_compaction(self):
         from langchain_core.messages import HumanMessage
-
         from Rxscientist.cli.commands import compact_conversation
 
         agent = MagicMock()
@@ -316,7 +314,6 @@ class TestCompactSuccess:
     def test_offload_failure_non_fatal(self):
         """Offload failure should not prevent compaction."""
         from langchain_core.messages import HumanMessage
-
         from Rxscientist.cli.commands import compact_conversation
 
         agent = MagicMock()
