@@ -155,6 +155,13 @@ class TestConvertVirtualPaths:
         )
         assert result == "cat ./tmp/somefile"
 
+    def test_argv0_absolute_interpreter_preserved_with_workspace(self):
+        """Absolute argv0 (e.g. CI ``sys.executable``) must not become ``./home/...``."""
+        interp = "/home/runner/work/RainyXscientist/repo/.venv/bin/python"
+        cmd = f"{interp} -c {json.dumps('print(1)')}"
+        out = convert_virtual_paths_in_command(cmd, workspace_name="workspace")
+        assert out.startswith(interp)
+
 
 # === CustomSandboxBackend._resolve_path ===
 

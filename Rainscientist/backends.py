@@ -88,6 +88,29 @@ def _has_traversal_component(command: str) -> bool:
     return False
 
 
+def _collect_argv0_absolute_paths(command: str) -> set[str]:
+    """Return argv0 tokens that are absolute paths (e.g. ``/usr/bin/python3``).
+
+    Used when rewriting virtual paths so we never turn a real interpreter path
+    into ``./home/...`` — which breaks ``find()``-based segment offsets when the
+    stripped segment is not an exact substring of ``command``.
+    """
+    paths: set[str] = set()
+    for segment in re.split(r"\s*(?:&&|\|\||;)\s*", command):
+        for pipe_seg in segment.split("|"):
+            ps = pipe_seg.strip()
+            if not ps:
+                continue
+            try:
+                tok0 = shlex.split(ps)[0]
+            except ValueError:
+                parts = ps.split(None, 1)
+                tok0 = parts[0] if parts else ""
+            if tok0.startswith("/"):
+                paths.add(tok0)
+    return paths
+
+
 def _collect_executable_positions(command: str) -> set[int]:
     """Return the string offsets of executable tokens (first token per segment).
 
@@ -225,13 +248,14 @@ def convert_virtual_paths_in_command(
         'mkdir -p ./dir'
     """
 
-    # Do not rewrite the interpreter / executable token (e.g. ``/usr/bin/python3``),
-    # otherwise absolute ``sys.executable`` paths become broken ``./usr/...`` paths.
-    exe_offsets = _collect_executable_positions(command)
+    # Do not rewrite argv0 when it is an absolute interpreter path (e.g.
+    # ``sys.executable`` under CI).  Offset-based skipping via
+    # ``find(pipe_segment)`` is unreliable when quoting/splitting differs.
+    argv0_abs_paths = _collect_argv0_absolute_paths(command)
 
     def replace_virtual_path(match: re.Match[str]) -> str:
         path = match.group(0)
-        if match.start() in exe_offsets:
+        if path in argv0_abs_paths:
             return path
 
         # Skip content that looks like a URL
