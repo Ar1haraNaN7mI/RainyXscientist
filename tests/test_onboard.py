@@ -250,10 +250,10 @@ class TestStepModel:
         config = RxscientistConfig()
 
         with patch("Rxscientist.config.onboard.questionary") as mock_q:
-            mock_q.select.return_value.ask.return_value = "claude-sonnet-4-5"
+            mock_q.select.return_value.ask.return_value = "claude-haiku-4-5"
             result = _step_model(config, "anthropic")
 
-        assert result == "claude-sonnet-4-5"
+        assert result == "claude-haiku-4-5"
 
     def test_raises_keyboard_interrupt_on_cancel(self):
         """Test that _step_model raises KeyboardInterrupt on cancel."""
@@ -848,7 +848,7 @@ class TestRunOnboard:
             mock_q.select.return_value.ask.side_effect = [
                 "tui",  # UI backend
                 "anthropic",  # Provider
-                "claude-sonnet-4-5",  # Model
+                "claude-haiku-4-5",  # Model
                 "daemon",  # Workspace mode
                 True,  # Show thinking
                 "skip",  # Channels: skip
@@ -905,7 +905,7 @@ class TestRunOnboard:
             mock_q.select.return_value.ask.side_effect = [
                 "tui",  # UI backend
                 "anthropic",
-                "claude-sonnet-4-5",
+                "claude-haiku-4-5",
                 "daemon",
                 True,  # Show thinking
                 "skip",  # Channels: skip

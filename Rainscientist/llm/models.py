@@ -185,7 +185,7 @@ MODELS: dict[str, tuple[str, str]] = {
     name: (model_id, provider) for name, model_id, provider in _MODEL_ENTRIES
 }
 
-DEFAULT_MODEL = "claude-sonnet-4-6"
+DEFAULT_MODEL = "claude-haiku-4-5"
 
 
 def get_models_for_provider(provider: str) -> list[tuple[str, str]]:
@@ -257,8 +257,8 @@ def get_chat_model(
     """Get a chat model instance.
 
     Args:
-        model: Model name (short name like 'claude-sonnet-4-5' or full ID
-               like 'claude-sonnet-4-5-20250929'). Defaults to DEFAULT_MODEL.
+        model: Model name (short name like 'claude-haiku-4-5' or full ID
+               like 'claude-haiku-4-5-20250929'). Defaults to DEFAULT_MODEL.
         provider: Override the provider (e.g., 'anthropic', 'openai').
                   If not specified, inferred from model name or defaults to 'anthropic'.
         **kwargs: Additional arguments passed to init_chat_model (e.g., temperature).
@@ -267,7 +267,7 @@ def get_chat_model(
         A LangChain chat model instance.
 
     Examples:
-        >>> model = get_chat_model()  # Uses default (claude-sonnet-4-5)
+        >>> model = get_chat_model()  # Uses default (claude-haiku-4-5)
         >>> model = get_chat_model("claude-opus-4-5")  # Use short name
         >>> model = get_chat_model("gpt-4o")  # OpenAI model
         >>> model = get_chat_model("claude-3-opus-20240229", provider="anthropic")  # Full ID

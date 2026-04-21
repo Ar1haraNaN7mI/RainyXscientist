@@ -85,7 +85,7 @@ class RxscientistConfig:
 
     # LLM Settings
     provider: str = "anthropic"
-    model: str = "claude-sonnet-4-5"
+    model: str = "claude-haiku-4-5"
 
     # Workspace Settings
     default_mode: Literal["daemon", "run"] = "daemon"
