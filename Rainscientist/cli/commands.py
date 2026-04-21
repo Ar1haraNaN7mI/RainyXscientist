@@ -1297,6 +1297,7 @@ def _main_callback(
                     workspace_dir=workspace_dir,
                     model=config.model,
                     ui_backend=config.ui_backend,
+                    config=config,
                 )
 
         import nest_asyncio  # type: ignore[import-untyped]

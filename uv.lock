@@ -1,5 +1,5 @@
 version = 1
-revision = 3
+revision = 2
 requires-python = ">=3.11"
 resolution-markers = [
     "python_full_version >= '3.14'",
@@ -869,148 +869,6 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/f5/22/900cb125c76b7aaa450ce02fd727f452243f2e91a61af068b40adba60ea9/email_validator-2.3.0.tar.gz", hash = "sha256:9fc05c37f2f6cf439ff414f8fc46d917929974a82244c20eb10231ba60c54426", size = 51238, upload-time = "2025-08-26T13:09:06.831Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/de/15/545e2b6cf2e3be84bc1ed85613edd75b8aea69807a71c26f4ca6a9258e82/email_validator-2.3.0-py3-none-any.whl", hash = "sha256:80f13f623413e6b197ae73bb10bf4eb0908faf509ad8362c5edeb0be7fd450b4", size = 35604, upload-time = "2025-08-26T13:09:05.858Z" },
-]
-
-[[package]]
-name = "Rxscientist"
-version = "0.0.8"
-source = { editable = "." }
-dependencies = [
-    { name = "deepagents" },
-    { name = "httpx" },
-    { name = "langchain" },
-    { name = "langchain-anthropic" },
-    { name = "langchain-google-genai" },
-    { name = "langchain-mcp-adapters" },
-    { name = "langchain-nvidia-ai-endpoints" },
-    { name = "langchain-ollama" },
-    { name = "langchain-openai" },
-    { name = "langchain-openrouter" },
-    { name = "langgraph-checkpoint-sqlite" },
-    { name = "langgraph-cli", extra = ["inmem"] },
-    { name = "markdownify" },
-    { name = "nest-asyncio" },
-    { name = "prompt-toolkit" },
-    { name = "python-dotenv" },
-    { name = "pyyaml" },
-    { name = "questionary" },
-    { name = "rich" },
-    { name = "tavily-python" },
-    { name = "textual" },
-    { name = "typer" },
-]
-
-[package.optional-dependencies]
-all-channels = [
-    { name = "aiohttp" },
-    { name = "discord-py" },
-    { name = "lark-oapi" },
-    { name = "pycryptodome" },
-    { name = "python-telegram-bot" },
-    { name = "qq-botpy" },
-    { name = "slack-sdk" },
-]
-dev = [
-    { name = "build" },
-    { name = "pre-commit" },
-    { name = "pytest" },
-    { name = "pytest-cov" },
-    { name = "pytest-timeout" },
-    { name = "ruff" },
-]
-discord = [
-    { name = "discord-py" },
-]
-feishu = [
-    { name = "lark-oapi" },
-]
-oauth = [
-    { name = "ccproxy-api" },
-]
-qq = [
-    { name = "qq-botpy" },
-]
-slack = [
-    { name = "aiohttp" },
-    { name = "slack-sdk" },
-]
-stt = [
-    { name = "faster-whisper" },
-]
-telegram = [
-    { name = "python-telegram-bot" },
-]
-wechat = [
-    { name = "pycryptodome" },
-]
-
-[package.dev-dependencies]
-dev = [
-    { name = "build" },
-    { name = "pre-commit" },
-    { name = "pytest" },
-    { name = "pytest-cov" },
-    { name = "pytest-timeout" },
-    { name = "ruff" },
-]
-
-[package.metadata]
-requires-dist = [
-    { name = "aiohttp", marker = "extra == 'all-channels'", specifier = ">=3.9" },
-    { name = "aiohttp", marker = "extra == 'slack'", specifier = ">=3.9" },
-    { name = "build", marker = "extra == 'dev'", specifier = ">=1.0" },
-    { name = "ccproxy-api", marker = "extra == 'oauth'", specifier = ">=0.2.7" },
-    { name = "deepagents", specifier = ">=0.5.3" },
-    { name = "discord-py", marker = "extra == 'all-channels'", specifier = ">=2.3" },
-    { name = "discord-py", marker = "extra == 'discord'", specifier = ">=2.3" },
-    { name = "faster-whisper", marker = "extra == 'stt'", specifier = ">=1.0" },
-    { name = "httpx", specifier = ">=0.27" },
-    { name = "langchain", specifier = ">=1.2.12" },
-    { name = "langchain-anthropic", specifier = ">=1.4.0" },
-    { name = "langchain-google-genai", specifier = ">=4.2.1" },
-    { name = "langchain-mcp-adapters", specifier = ">=0.1" },
-    { name = "langchain-nvidia-ai-endpoints", specifier = ">=0.3" },
-    { name = "langchain-ollama", specifier = ">=1.0" },
-    { name = "langchain-openai", specifier = ">=1.1" },
-    { name = "langchain-openrouter", specifier = ">=0.2.1" },
-    { name = "langgraph-checkpoint-sqlite", specifier = ">=3.0.0" },
-    { name = "langgraph-cli", extras = ["inmem"], specifier = ">=0.4" },
-    { name = "lark-oapi", marker = "extra == 'all-channels'", specifier = ">=1.4.0" },
-    { name = "lark-oapi", marker = "extra == 'feishu'", specifier = ">=1.4.0" },
-    { name = "markdownify", specifier = ">=0.14" },
-    { name = "nest-asyncio", specifier = ">=1.6" },
-    { name = "pre-commit", marker = "extra == 'dev'", specifier = ">=3.5.0" },
-    { name = "prompt-toolkit", specifier = ">=3.0" },
-    { name = "pycryptodome", marker = "extra == 'all-channels'", specifier = ">=3.20" },
-    { name = "pycryptodome", marker = "extra == 'wechat'", specifier = ">=3.20" },
-    { name = "pytest", marker = "extra == 'dev'", specifier = ">=8.0" },
-    { name = "pytest-cov", marker = "extra == 'dev'", specifier = ">=5.0" },
-    { name = "pytest-timeout", marker = "extra == 'dev'", specifier = ">=2.4" },
-    { name = "python-dotenv", specifier = ">=1.0" },
-    { name = "python-telegram-bot", marker = "extra == 'all-channels'", specifier = ">=21.0" },
-    { name = "python-telegram-bot", marker = "extra == 'telegram'", specifier = ">=21.0" },
-    { name = "pyyaml", specifier = ">=6.0" },
-    { name = "qq-botpy", marker = "extra == 'all-channels'", specifier = ">=1.0" },
-    { name = "qq-botpy", marker = "extra == 'qq'", specifier = ">=1.0" },
-    { name = "questionary", specifier = ">=2.0.1" },
-    { name = "rich", specifier = ">=14.0" },
-    { name = "ruff", marker = "extra == 'dev'", specifier = ">=0.5" },
-    { name = "slack-sdk", marker = "extra == 'all-channels'", specifier = ">=3.27" },
-    { name = "slack-sdk", marker = "extra == 'slack'", specifier = ">=3.27" },
-    { name = "tavily-python", specifier = ">=0.7" },
-    { name = "textual", specifier = ">=0.80" },
-    { name = "typer", specifier = ">=0.12" },
-]
-provides-extras = ["dev", "telegram", "discord", "slack", "wechat", "feishu", "qq", "stt", "oauth", "all-channels"]
-
-[package.metadata.requires-dev]
-dev = [
-    { name = "build", specifier = ">=1.0" },
-    { name = "pre-commit", specifier = ">=3.5.0" },
-    { name = "pytest", specifier = ">=8.0" },
-    { name = "pytest-cov", specifier = ">=5.0" },
-    { name = "pytest-timeout", specifier = ">=2.4" },
-    { name = "ruff", specifier = ">=0.5" },
 ]
 
 [[package]]
@@ -3904,6 +3762,148 @@ wheels = [
     { url = "https://files.pythonhosted.org/packages/e4/46/602938f030adfa043e67112b73821024dc79f3ab4df5474c25fa4c1d2d14/ruff-0.15.10-py3-none-win32.whl", hash = "sha256:d4272e87e801e9a27a2e8df7b21011c909d9ddd82f4f3281d269b6ba19789ca5", size = 10588964, upload-time = "2026-04-09T14:06:07.14Z" },
     { url = "https://files.pythonhosted.org/packages/25/b6/261225b875d7a13b33a6d02508c39c28450b2041bb01d0f7f1a83d569512/ruff-0.15.10-py3-none-win_amd64.whl", hash = "sha256:28cb32d53203242d403d819fd6983152489b12e4a3ae44993543d6fe62ab42ed", size = 11745044, upload-time = "2026-04-09T14:05:39.473Z" },
     { url = "https://files.pythonhosted.org/packages/58/ed/dea90a65b7d9e69888890fb14c90d7f51bf0c1e82ad800aeb0160e4bacfd/ruff-0.15.10-py3-none-win_arm64.whl", hash = "sha256:601d1610a9e1f1c2165a4f561eeaa2e2ea1e97f3287c5aa258d3dab8b57c6188", size = 11035607, upload-time = "2026-04-09T14:05:47.593Z" },
+]
+
+[[package]]
+name = "rxscientist"
+version = "0.0.10"
+source = { editable = "." }
+dependencies = [
+    { name = "deepagents" },
+    { name = "httpx" },
+    { name = "langchain" },
+    { name = "langchain-anthropic" },
+    { name = "langchain-google-genai" },
+    { name = "langchain-mcp-adapters" },
+    { name = "langchain-nvidia-ai-endpoints" },
+    { name = "langchain-ollama" },
+    { name = "langchain-openai" },
+    { name = "langchain-openrouter" },
+    { name = "langgraph-checkpoint-sqlite" },
+    { name = "langgraph-cli", extra = ["inmem"] },
+    { name = "markdownify" },
+    { name = "nest-asyncio" },
+    { name = "prompt-toolkit" },
+    { name = "python-dotenv" },
+    { name = "pyyaml" },
+    { name = "questionary" },
+    { name = "rich" },
+    { name = "tavily-python" },
+    { name = "textual" },
+    { name = "typer" },
+]
+
+[package.optional-dependencies]
+all-channels = [
+    { name = "aiohttp" },
+    { name = "discord-py" },
+    { name = "lark-oapi" },
+    { name = "pycryptodome" },
+    { name = "python-telegram-bot" },
+    { name = "qq-botpy" },
+    { name = "slack-sdk" },
+]
+dev = [
+    { name = "build" },
+    { name = "pre-commit" },
+    { name = "pytest" },
+    { name = "pytest-cov" },
+    { name = "pytest-timeout" },
+    { name = "ruff" },
+]
+discord = [
+    { name = "discord-py" },
+]
+feishu = [
+    { name = "lark-oapi" },
+]
+oauth = [
+    { name = "ccproxy-api" },
+]
+qq = [
+    { name = "qq-botpy" },
+]
+slack = [
+    { name = "aiohttp" },
+    { name = "slack-sdk" },
+]
+stt = [
+    { name = "faster-whisper" },
+]
+telegram = [
+    { name = "python-telegram-bot" },
+]
+wechat = [
+    { name = "pycryptodome" },
+]
+
+[package.dev-dependencies]
+dev = [
+    { name = "build" },
+    { name = "pre-commit" },
+    { name = "pytest" },
+    { name = "pytest-cov" },
+    { name = "pytest-timeout" },
+    { name = "ruff" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "aiohttp", marker = "extra == 'all-channels'", specifier = ">=3.9" },
+    { name = "aiohttp", marker = "extra == 'slack'", specifier = ">=3.9" },
+    { name = "build", marker = "extra == 'dev'", specifier = ">=1.0" },
+    { name = "ccproxy-api", marker = "extra == 'oauth'", specifier = ">=0.2.7" },
+    { name = "deepagents", specifier = ">=0.5.3" },
+    { name = "discord-py", marker = "extra == 'all-channels'", specifier = ">=2.3" },
+    { name = "discord-py", marker = "extra == 'discord'", specifier = ">=2.3" },
+    { name = "faster-whisper", marker = "extra == 'stt'", specifier = ">=1.0" },
+    { name = "httpx", specifier = ">=0.27" },
+    { name = "langchain", specifier = ">=1.2.12" },
+    { name = "langchain-anthropic", specifier = ">=1.4.0" },
+    { name = "langchain-google-genai", specifier = ">=4.2.1" },
+    { name = "langchain-mcp-adapters", specifier = ">=0.1" },
+    { name = "langchain-nvidia-ai-endpoints", specifier = ">=0.3" },
+    { name = "langchain-ollama", specifier = ">=1.0" },
+    { name = "langchain-openai", specifier = ">=1.1" },
+    { name = "langchain-openrouter", specifier = ">=0.2.1" },
+    { name = "langgraph-checkpoint-sqlite", specifier = ">=3.0.0" },
+    { name = "langgraph-cli", extras = ["inmem"], specifier = ">=0.4" },
+    { name = "lark-oapi", marker = "extra == 'all-channels'", specifier = ">=1.4.0" },
+    { name = "lark-oapi", marker = "extra == 'feishu'", specifier = ">=1.4.0" },
+    { name = "markdownify", specifier = ">=0.14" },
+    { name = "nest-asyncio", specifier = ">=1.6" },
+    { name = "pre-commit", marker = "extra == 'dev'", specifier = ">=3.5.0" },
+    { name = "prompt-toolkit", specifier = ">=3.0" },
+    { name = "pycryptodome", marker = "extra == 'all-channels'", specifier = ">=3.20" },
+    { name = "pycryptodome", marker = "extra == 'wechat'", specifier = ">=3.20" },
+    { name = "pytest", marker = "extra == 'dev'", specifier = ">=8.0" },
+    { name = "pytest-cov", marker = "extra == 'dev'", specifier = ">=5.0" },
+    { name = "pytest-timeout", marker = "extra == 'dev'", specifier = ">=2.4" },
+    { name = "python-dotenv", specifier = ">=1.0" },
+    { name = "python-telegram-bot", marker = "extra == 'all-channels'", specifier = ">=21.0" },
+    { name = "python-telegram-bot", marker = "extra == 'telegram'", specifier = ">=21.0" },
+    { name = "pyyaml", specifier = ">=6.0" },
+    { name = "qq-botpy", marker = "extra == 'all-channels'", specifier = ">=1.0" },
+    { name = "qq-botpy", marker = "extra == 'qq'", specifier = ">=1.0" },
+    { name = "questionary", specifier = ">=2.0.1" },
+    { name = "rich", specifier = ">=14.0" },
+    { name = "ruff", marker = "extra == 'dev'", specifier = ">=0.5" },
+    { name = "slack-sdk", marker = "extra == 'all-channels'", specifier = ">=3.27" },
+    { name = "slack-sdk", marker = "extra == 'slack'", specifier = ">=3.27" },
+    { name = "tavily-python", specifier = ">=0.7" },
+    { name = "textual", specifier = ">=0.80" },
+    { name = "typer", specifier = ">=0.12" },
+]
+provides-extras = ["dev", "telegram", "discord", "slack", "wechat", "feishu", "qq", "stt", "oauth", "all-channels"]
+
+[package.metadata.requires-dev]
+dev = [
+    { name = "build", specifier = ">=1.0" },
+    { name = "pre-commit", specifier = ">=3.5.0" },
+    { name = "pytest", specifier = ">=8.0" },
+    { name = "pytest-cov", specifier = ">=5.0" },
+    { name = "pytest-timeout", specifier = ">=2.4" },
+    { name = "ruff", specifier = ">=0.5" },
 ]
 
 [[package]]

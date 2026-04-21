@@ -409,7 +409,7 @@ def get_effective_config(
     Returns:
         RxscientistConfig with merged values.
     """
-    load_dotenv(find_dotenv(usecwd=True), override=True)
+    load_environment_dotenv()
 
     # Start with file config (includes defaults for missing values)
     config = load_config()
@@ -434,6 +434,148 @@ def get_effective_config(
                 data[key] = value
 
     return RxscientistConfig(**data)
+
+
+def load_environment_dotenv() -> None:
+    """Load ``.env`` files so API keys resolve when CWD is not the repo root.
+
+    Precedence (later wins when setting the same variable name):
+
+    1. ``.env`` next to ``pyproject.toml`` (repository / package checkout)
+    2. ``.env`` under the Rxscientist config directory (e.g. ``~/.config/Rxscientist``)
+    3. ``.env`` discovered from the current working directory (``find_dotenv``)
+    """
+    repo_env: Path | None = None
+    cur = Path(__file__).resolve().parent
+    for _ in range(14):
+        if (cur / "pyproject.toml").is_file():
+            candidate = cur / ".env"
+            if candidate.is_file():
+                repo_env = candidate
+            break
+        parent = cur.parent
+        if parent == cur:
+            break
+        cur = parent
+
+    if repo_env is not None:
+        load_dotenv(repo_env, override=False)
+
+    xdg_env = get_config_dir() / ".env"
+    if xdg_env.is_file():
+        load_dotenv(xdg_env, override=False)
+
+    cwd_file = find_dotenv(filename=".env", usecwd=True)
+    if cwd_file:
+        load_dotenv(cwd_file, override=True)
+
+
+def _provider_env_requirements(provider: str) -> tuple[list[str], list[str]]:
+    """Return (secret env vars, additional required non-secret env vars) for *provider*."""
+    if provider == "anthropic":
+        return (["ANTHROPIC_API_KEY"], [])
+    if provider == "openai":
+        return (["OPENAI_API_KEY"], [])
+    if provider == "google-genai":
+        return (["GOOGLE_API_KEY"], [])
+    if provider == "nvidia":
+        return (["NVIDIA_API_KEY"], [])
+    if provider == "openrouter":
+        return (["OPENROUTER_API_KEY"], [])
+    if provider == "deepseek":
+        return (["DEEPSEEK_API_KEY"], [])
+    if provider == "moonshot":
+        return (["MOONSHOT_API_KEY"], [])
+    if provider == "siliconflow":
+        return (["SILICONFLOW_API_KEY"], [])
+    if provider in ("zhipu", "zhipu-code"):
+        return (["ZHIPU_API_KEY"], [])
+    if provider == "volcengine":
+        return (["VOLCENGINE_API_KEY"], [])
+    if provider == "dashscope":
+        return (["DASHSCOPE_API_KEY"], [])
+    if provider == "custom-openai":
+        return (["CUSTOM_OPENAI_API_KEY"], ["CUSTOM_OPENAI_BASE_URL"])
+    if provider == "minimax":
+        return (["MINIMAX_API_KEY"], [])
+    if provider == "kimi-coding":
+        return (["KIMI_API_KEY"], [])
+    if provider == "custom-anthropic":
+        return (["CUSTOM_ANTHROPIC_API_KEY"], ["CUSTOM_ANTHROPIC_BASE_URL"])
+    if provider == "ollama":
+        return ([], [])
+    return ([], [])
+
+
+def has_expected_llm_credentials(config: RxscientistConfig) -> bool:
+    """Return True when required env vars for *config.provider* appear set.
+
+    Call after :func:`apply_config_to_env` so file-based keys are visible in
+    ``os.environ``. OAuth modes skip API-key checks for native Anthropic/OpenAI.
+    """
+    p = config.provider
+    if p == "ollama":
+        return True
+    if p == "anthropic" and getattr(config, "anthropic_auth_mode", "") == "oauth":
+        return True
+    if p == "openai" and getattr(config, "openai_auth_mode", "") == "oauth":
+        return True
+
+    secrets, extras = _provider_env_requirements(p)
+    if not secrets and not extras:
+        return True
+
+    for name in secrets + extras:
+        if not (os.environ.get(name, "") or "").strip():
+            return False
+    return True
+
+
+def api_credentials_hint_lines(config: RxscientistConfig) -> list[str]:
+    """Human-readable lines for configuring API access (plain text, no markup)."""
+    secrets, extras = _provider_env_requirements(config.provider)
+    needed = secrets + extras
+    cfg_path = get_config_path()
+    lines = [
+        f"Provider: {config.provider}",
+    ]
+    if needed:
+        lines.append(f"Set environment variable(s): {', '.join(needed)}")
+    lines.extend(
+        [
+            f"Or store keys in: {cfg_path} (see `rxsci config`)",
+            "Repository `.env` (next to pyproject.toml) is loaded automatically.",
+            "Interactive setup: run `rxsci onboard`",
+        ]
+    )
+    return lines
+
+
+def classify_llm_connection_error(
+    exc: BaseException,
+    config: RxscientistConfig,
+) -> str:
+    """Classify an LLM failure for messaging: missing_credentials | auth_rejected | other."""
+    if not has_expected_llm_credentials(config):
+        return "missing_credentials"
+
+    msg = str(exc).lower()
+    auth_markers = (
+        "401",
+        "403",
+        "invalid api key",
+        "incorrect api key",
+        "invalid_api_key",
+        "authentication failed",
+        "permission denied",
+        "api key provided but invalid",
+        "invalid x-api-key",
+        "unauthorized",
+    )
+    if any(m in msg for m in auth_markers):
+        return "auth_rejected"
+
+    return "other"
 
 
 def apply_config_to_env(config: RxscientistConfig) -> None:

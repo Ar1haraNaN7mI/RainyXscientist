@@ -11,6 +11,163 @@ It provides a practical command-line research copilot that can plan tasks, call 
 - Multi-channel architecture (for example Telegram, Slack, Feishu, WeChat, Discord, QQ).
 - Persistent thread/session state to continue research over time.
 
+## Complete tutorial: download → configure → launch
+
+Follow these steps once on a clean machine. **PyPI package name:** `Rxscientist` · **CLI commands:** `rxsci` / `Rxscientist`.
+
+### Step 1 — Prerequisites
+
+| Requirement | Notes |
+|-------------|--------|
+| **Python** | **3.11+** (see `requires-python` in `pyproject.toml`). |
+| **Installer** | `pip` (bundled with Python) or **`uv`** ([docs.astral.sh/uv](https://docs.astral.sh/uv/)). |
+| **Network** | Needed to install packages and call LLM / search APIs. |
+| **API key** | Default stack uses **Anthropic** (`ANTHROPIC_API_KEY`). Other providers need their own keys (see Step 3). |
+
+Check Python: `python --version` or `py -3.12 --version` on Windows.
+
+### Step 2 — Install the package (choose one path)
+
+**A — PyPI (simplest once a release exists)**
+
+```bash
+pip install Rxscientist
+```
+
+Or with uv:
+
+```bash
+uv tool install Rxscientist
+```
+
+If PyPI returns *package not found*, use B–D until maintainers publish.
+
+**B — Install directly from Git** (always up to date with `main`)
+
+```bash
+uv tool install "git+https://github.com/Ar1haraNaN7mI/RainyXscientist.git"
+```
+
+Pin a branch/tag if needed:
+
+```bash
+uv tool install "git+https://github.com/Ar1haraNaN7mI/RainyXscientist.git@main"
+```
+
+**C — Clone and run in a dev environment**
+
+```bash
+git clone https://github.com/Ar1haraNaN7mI/RainyXscientist.git
+cd RainyXscientist
+uv sync
+uv run rxsci
+```
+
+After `uv sync`, activate `.venv` if you prefer and run `rxsci` from that environment.
+
+**D — Offline / air-gapped: wheel from GitHub Releases**
+
+1. Open [Releases](https://github.com/Ar1haraNaN7mI/RainyXscientist/releases) and download **`Rxscientist-*-py3-none-any.whl`** (source `.tar.gz` is optional).
+2. Install with the Python you plan to use:
+
+```bash
+pip install /path/to/Rxscientist-0.0.10-py3-none-any.whl
+```
+
+Replace the filename with the asset you downloaded.
+
+### Step 3 — Configure API keys and defaults
+
+Configuration **priority** (highest first): **CLI flags** → **environment variables** → **`config.yaml`** → **built-in defaults**.
+
+**Recommended first-time setup — interactive wizard**
+
+```bash
+rxsci onboard
+```
+
+This walks you through API keys and basic options (you can skip validation flags if needed).
+
+**Environment variables**
+
+Set at least the key for your provider. Defaults in code target **Anthropic** unless you change `provider` / `model` in config.
+
+| Provider (examples) | Typical variable |
+|---------------------|------------------|
+| Anthropic (Claude) | `ANTHROPIC_API_KEY` |
+| OpenAI | `OPENAI_API_KEY` |
+| Google Gemini | `GOOGLE_API_KEY` |
+| Others | See `Rainscientist/config/settings.py` mappings (`*_API_KEY`) |
+
+On Windows (PowerShell, current session):
+
+```powershell
+$env:ANTHROPIC_API_KEY = "sk-ant-api03-..."
+```
+
+**Config file**
+
+User-wide YAML (created on first save):
+
+- **Windows:** `%USERPROFILE%\.config\Rxscientist\config.yaml`
+- **Linux / macOS:** `$XDG_CONFIG_HOME/Rxscientist/config.yaml` or `~/.config/Rxscientist/config.yaml`
+
+Inspect or edit keys with:
+
+```bash
+rxsci config
+```
+
+**`.env` files** (loaded automatically when present)
+
+Layers are merged; later layers override earlier ones for the same variable name:
+
+1. `.env` next to the repo’s **`pyproject.toml`** (so keys work even if your shell is not in the project folder).
+2. `.env` under the Rxscientist config directory (same folder as `config.yaml`).
+3. `.env` discovered from the **current working directory** (highest priority).
+
+Example **repo** `.env` at the clone root:
+
+```env
+ANTHROPIC_API_KEY=sk-ant-api03-...
+```
+
+### Step 4 — Launch
+
+Start the interactive UI (default may be TUI or CLI depending on config):
+
+```bash
+rxsci
+```
+
+Help and subcommands:
+
+```bash
+rxsci --help
+```
+
+If `rxsci` is not on `PATH`, call the module entry (same CLI):
+
+```bash
+python -m Rxscientist --help
+```
+
+On Windows, `rxsci.exe` usually lives under your Python or virtualenv **`Scripts`** directory — add that folder to **PATH** if the command is not found.
+
+### Step 5 — Verify and next steps
+
+- Send a short prompt; if you see credential errors, re-check Step 3 (wizard, env, YAML, `.env`).
+- Explore **`rxsci config`**, **`/help`** inside the UI (when available), and optional **MCP** tooling for external integrations.
+
+#### 中文简明步骤
+
+1. **安装 Python 3.11+**，建议使用 **pip** 或 **uv**。  
+2. **安装包**：优先 `pip install Rxscientist`；若 PyPI 暂无包，使用上文 **B/C/D**（Git / 克隆 / Release  wheel）。  
+3. **配置密钥**：运行 **`rxsci onboard`**，或设置环境变量（如 **`ANTHROPIC_API_KEY`**），或编辑 **`%USERPROFILE%\.config\Rxscientist\config.yaml`**（Windows），或在项目根 / 配置目录放置 **`.env`**。  
+4. **启动**：执行 **`rxsci`**；若无命令，使用 **`python -m Rxscientist`**，并把 Python 的 **`Scripts`** 加入 **PATH**。  
+
+---
+
 ## Quick start (install then run)
 
 Start the CLI with **`rxsci`** after installing the **`Rxscientist`** Python package (see `pyproject.toml` — PyPI name is **`Rxscientist`**, CLI commands are **`rxsci`** / **`Rxscientist`**).
@@ -63,7 +220,7 @@ Each push to `main` publishes **wheel / sdist** assets under [Releases](https://
 2. Install with pip (use the same Python where you want `rxsci`):
 
 ```bash
-pip install "C:\path\to\Rxscientist-0.0.8-py3-none-any.whl"
+pip install "C:\path\to\Rxscientist-0.0.10-py3-none-any.whl"
 rxsci
 ```
 
@@ -76,7 +233,7 @@ This repo includes **`.github/workflows/publish-pypi.yml`**. One-time setup:
 1. Create accounts on [pypi.org](https://pypi.org) (and optionally [test.pypi.org](https://test.pypi.org) for trials).
 2. Confirm the project name **`Rxscientist`** is available on PyPI (change `[project] name` in `pyproject.toml` if it is taken).
 3. On PyPI → **Publishing** → **Add a new pending publisher** → choose **GitHub** → organization/user **`Ar1haraNaN7mI`**, repository **`RainyXscientist`**, workflow **`publish-pypi.yml`**, PyPI project **`Rxscientist`** (must match `pyproject.toml`).
-4. Bump **`version`** in `pyproject.toml`, commit, create and push an annotated tag **`vX.Y.Z`** matching that version (example: version `0.0.9` → tag **`v0.0.9`**). The workflow runs `uv build` and uploads **`dist/*`** to PyPI.
+4. Bump **`version`** in `pyproject.toml`, commit, create and push an annotated tag **`vX.Y.Z`** matching that version (example: version `0.0.10` → tag **`v0.0.10`**). The workflow runs `uv build` and uploads **`dist/*`** to PyPI.
 
 Manual upload (API token):
 
@@ -90,6 +247,8 @@ Use a token with **Entire account** or **Project-scoped** upload scope from PyPI
 ---
 
 ## 中文：下载与启动说明（Windows）
+
+更系统的「下载 → 配置 → 启动」全流程见前文 **Complete tutorial: download → configure → launch**（含中英文摘要）；本节补充 Windows 常见问题与路径。
 
 ### PyPI 安装（推荐，在维护者已上传之后）
 
@@ -134,7 +293,7 @@ python -m Rxscientist
 3. 在下载目录执行（版本号按文件名修改）：
 
 ```powershell
-py -3.12 -m pip install .\Rxscientist-0.0.8-py3-none-any.whl
+py -3.12 -m pip install .\Rxscientist-0.0.10-py3-none-any.whl
 rxsci
 ```
 
@@ -175,7 +334,7 @@ uv run rxsci
    - PyPI：**Account settings → Publishing → Add pending publisher**  
    - 选择 GitHub：**Owner** `Ar1haraNaN7mI`，**Repository** `RainyXscientist`，**Workflow** `publish-pypi.yml`，**PyPI project name** `Rxscientist`（须与 `pyproject.toml` 一致）。  
    - 详见官方说明：<https://docs.pypi.org/trusted-publishers/>
-4. **发版**：在 `pyproject.toml` 里提高 **`version`**，提交后打标签 **`v` + 语义化版本号**（例如版本 `0.0.9` → 标签 **`v0.0.9`**），推送标签将触发 **`.github/workflows/publish-pypi.yml`**，自动 **`uv build`** 并上传到 PyPI。  
+4. **发版**：在 `pyproject.toml` 里提高 **`version`**，提交后打标签 **`v` + 语义化版本号**（例如版本 `0.0.10` → 标签 **`v0.0.10`**），推送标签将触发 **`.github/workflows/publish-pypi.yml`**，自动 **`uv build`** 并上传到 PyPI。  
    也可在 GitHub **Actions → Publish PyPI → Run workflow** 手动运行（同样需要已配置可信发布）。
 5. **本地用令牌上传（备用）**：在 PyPI 账户设置里创建 **API token**，切勿提交到 Git：
 

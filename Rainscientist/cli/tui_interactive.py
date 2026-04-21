@@ -206,6 +206,7 @@ def run_textual_interactive(
     thread_id: str | None,
     load_agent: Callable[..., Any],
     create_session_workspace: Callable[[str | None], str],
+    config: Any | None = None,
 ) -> None:
     """Run full-screen Textual interactive chat loop."""
     try:
@@ -1438,19 +1439,30 @@ def run_textual_interactive(
                     # Ctrl+C cancellation — re-raise so _run_turn can handle it
                     raise
                 except Exception as exc:
-                    error_msg = str(exc)
-                    if (
-                        "authentication" in error_msg.lower()
-                        or "api_key" in error_msg.lower()
-                    ):
+                    from ..config.settings import (
+                        api_credentials_hint_lines,
+                        apply_config_to_env,
+                        classify_llm_connection_error,
+                        get_effective_config,
+                    )
+
+                    cfg = config if config is not None else get_effective_config()
+                    apply_config_to_env(cfg)
+                    kind = classify_llm_connection_error(exc, cfg)
+                    if kind == "missing_credentials":
                         self._append_system(
-                            "Error: API key not configured.",
+                            "LLM credentials are missing or incomplete.",
                             style="red",
                         )
+                        for line in api_credentials_hint_lines(cfg):
+                            self._append_system(line, style="dim")
+                    elif kind == "auth_rejected":
                         self._append_system(
-                            "Run rxsci onboard to set up your API key.",
-                            style="dim",
+                            f"Authentication failed: {exc}",
+                            style="red",
                         )
+                        for line in api_credentials_hint_lines(cfg):
+                            self._append_system(line, style="dim")
                     else:
                         self._append_system(f"Error: {exc}", style="red")
                     response = f"Error: {exc}"

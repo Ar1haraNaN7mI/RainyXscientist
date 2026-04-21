@@ -30,6 +30,12 @@ from rich.panel import Panel
 from rich.table import Table
 from rich.text import Text
 
+from ..config.settings import (
+    api_credentials_hint_lines,
+    apply_config_to_env,
+    classify_llm_connection_error,
+    get_effective_config,
+)
 from ..sessions import (
     _format_relative_time,
     delete_thread,
@@ -238,6 +244,29 @@ class SlashCommandCompleter(Completer):
 # =============================================================================
 
 
+def _resolve_config_for_errors(config: Any | None) -> Any:
+    """Effective config + env merge for credential checks in error handlers."""
+    cfg = config if config is not None else get_effective_config()
+    apply_config_to_env(cfg)
+    return cfg
+
+
+def _report_llm_failure(exc: BaseException, cfg: Any) -> str:
+    """Print LLM/streaming errors; return classify_llm_connection_error kind."""
+    kind = classify_llm_connection_error(exc, cfg)
+    if kind == "missing_credentials":
+        console.print("[red]LLM credentials are missing or incomplete.[/red]")
+        for line in api_credentials_hint_lines(cfg):
+            console.print(f"[dim]{escape(line)}[/dim]")
+    elif kind == "auth_rejected":
+        console.print(f"[red]Authentication failed:[/red] {escape(str(exc))}")
+        for line in api_credentials_hint_lines(cfg):
+            console.print(f"[dim]{escape(line)}[/dim]")
+    else:
+        console.print(f"[red]Error: {escape(str(exc))}[/red]")
+    return kind
+
+
 def cmd_interactive(
     show_thinking: bool = True,
     channel_send_thinking: bool = True,
@@ -289,6 +318,7 @@ def cmd_interactive(
             thread_id=thread_id,
             load_agent=load_agent,
             create_session_workspace=_create_session_workspace,
+            config=config,
         )
         return
 
@@ -1116,19 +1146,11 @@ def cmd_interactive(
                         state["running"] = False
                         break
                     except Exception as e:
-                        error_msg = str(e)
-                        if (
-                            "authentication" in error_msg.lower()
-                            or "api_key" in error_msg.lower()
-                        ):
-                            console.print("[red]Error: API key not configured.[/red]")
-                            console.print(
-                                "[dim]Run [bold]rxsci onboard[/bold] to set up your API key.[/dim]"
-                            )
+                        cfg_err = _resolve_config_for_errors(config)
+                        kind = _report_llm_failure(e, cfg_err)
+                        if kind in ("missing_credentials", "auth_rejected"):
                             state["running"] = False
                             break
-                        else:
-                            console.print(f"[red]Error: {escape(str(e))}[/red]")
             finally:
                 queue_task.cancel()
                 try:
@@ -1151,6 +1173,7 @@ def cmd_run(
     workspace_dir: str | None = None,
     model: str | None = None,
     ui_backend: str = "cli",
+    config: Any | None = None,
 ) -> None:
     """Single-shot execution with streaming display.
 
@@ -1162,6 +1185,7 @@ def cmd_run(
         workspace_dir: Per-session workspace directory path
         model: Model name for checkpoint metadata
         ui_backend: UI backend ('cli' or 'tui')
+        config: Merged RxscientistConfig from the CLI (for credential error hints)
     """
     thread_id = thread_id or generate_thread_id()
 
@@ -1187,13 +1211,8 @@ def cmd_run(
             metadata=meta,
         )
     except Exception as e:
-        error_msg = str(e)
-        if "authentication" in error_msg.lower() or "api_key" in error_msg.lower():
-            console.print("[red]Error: API key not configured.[/red]")
-            console.print(
-                "[dim]Run [bold]rxsci onboard[/bold] to set up your API key.[/dim]"
-            )
+        cfg_err = _resolve_config_for_errors(config)
+        kind = _report_llm_failure(e, cfg_err)
+        if kind in ("missing_credentials", "auth_rejected"):
             raise typer.Exit(1) from e
-        else:
-            console.print(f"[red]Error: {e}[/red]")
-            raise
+        raise
