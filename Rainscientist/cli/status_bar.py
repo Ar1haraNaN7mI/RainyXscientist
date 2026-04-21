@@ -49,7 +49,7 @@ def _percent_from_context(context_tokens: int, context_window: int) -> int:
 
 def _get_default_chat_model() -> Any:
     """Resolve the default chat model lazily to avoid import cycles."""
-    from ..Rxscientist import _ensure_chat_model
+    from ..Rainscientist import _ensure_chat_model
 
     return _ensure_chat_model()
 

@@ -60,6 +60,7 @@ class TestParseFileMentions:
 
     def test_tilde_expansion(self, tmp_path: Path, monkeypatch) -> None:
         monkeypatch.setenv("HOME", str(tmp_path))
+        monkeypatch.setenv("USERPROFILE", str(tmp_path))
         f = tmp_path / "file.txt"
         f.write_text("x")
         files, _ = parse_file_mentions("@~/file.txt", cwd=tmp_path)

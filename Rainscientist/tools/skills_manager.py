@@ -506,7 +506,7 @@ def list_skills(include_system: bool = False) -> list[SkillInfo]:
 
     # Tier 3: built-in skills (optional)
     if include_system:
-        from ..Rxscientist import SKILLS_DIR
+        from ..Rainscientist import SKILLS_DIR
 
         _add_tier(Path(SKILLS_DIR), source="builtin")
 
@@ -562,7 +562,7 @@ def uninstall_skill(name: str) -> dict:
         return {"success": True, "name": name}
 
     # Check if it's a built-in skill (read-only, cannot be uninstalled)
-    from ..Rxscientist import SKILLS_DIR
+    from ..Rainscientist import SKILLS_DIR
 
     builtin_dir = Path(SKILLS_DIR)
     if builtin_dir.exists():

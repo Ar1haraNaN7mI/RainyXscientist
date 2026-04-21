@@ -107,7 +107,7 @@ async def _async_main(
     consumer: InboundConsumer | None = None
     if use_agent:
         logger.info("Loading Rxscientist agent...")
-        from ..Rxscientist import create_cli_agent
+        from ..Rainscientist import create_cli_agent
 
         agent = create_cli_agent()
         logger.info("Agent loaded")

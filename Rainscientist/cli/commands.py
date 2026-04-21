@@ -334,7 +334,7 @@ async def compact_conversation(
         compute_summarization_defaults,
     )
 
-    from ..Rxscientist import _ensure_chat_model, _get_default_backend
+    from ..Rainscientist import _ensure_chat_model, _get_default_backend
 
     try:
         model = _ensure_chat_model()

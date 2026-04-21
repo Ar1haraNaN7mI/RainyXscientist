@@ -68,7 +68,7 @@ def _load_agent(workspace_dir: str | None = None, checkpointer=None, config=None
         config: Optional pre-loaded ``RxscientistConfig``.  Forwarded to
             ``create_cli_agent`` to avoid double config loading.
     """
-    from ..Rxscientist import create_cli_agent
+    from ..Rainscientist import create_cli_agent
 
     return create_cli_agent(
         workspace_dir=workspace_dir, checkpointer=checkpointer, config=config

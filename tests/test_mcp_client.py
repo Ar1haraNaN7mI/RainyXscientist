@@ -1,6 +1,7 @@
 """Tests for Rxscientist.mcp module."""
 
 import textwrap
+from pathlib import Path
 from types import SimpleNamespace
 
 import pytest
@@ -110,7 +111,8 @@ class TestResolveCommand:
     def test_found_on_path(self):
         """Commands found via shutil.which are returned as full paths."""
         result = _resolve_command("python")
-        assert result.endswith("python") or result.endswith("python3")
+        name = Path(result).name.lower()
+        assert name.startswith(("python", "python3"))
         assert result != "python"  # resolved, not the bare name
 
     def test_found_in_python_bin(self, tmp_path, monkeypatch):
@@ -160,7 +162,7 @@ class TestBuildConnections:
         conns = _build_connections(config)
         assert "fs" in conns
         assert conns["fs"]["transport"] == "stdio"
-        assert conns["fs"]["command"].endswith("npx")
+        assert Path(conns["fs"]["command"]).stem.lower() == "npx"
         assert conns["fs"]["args"] == ["-y", "server"]
 
     def test_stdio_with_env(self, monkeypatch):

@@ -45,7 +45,7 @@ def create_context_editing_middleware(model: BaseChatModel | None = None):
     from langchain.agents.middleware import ClearToolUsesEdit, ContextEditingMiddleware
 
     if model is None:
-        from Rxscientist.Rxscientist import _ensure_chat_model
+        from ..Rainscientist import _ensure_chat_model
 
         model = _ensure_chat_model()
 

@@ -1,13 +1,19 @@
 """Tests for Rxscientist/backends.py — validate_command, path conversion, resolve_path."""
 
+import json
 import re
+import sys
 from pathlib import Path
 
+import pytest
 from Rxscientist.backends import (
     CustomSandboxBackend,
     convert_virtual_paths_in_command,
     validate_command,
 )
+
+POSIX_SHELL = sys.platform != "win32"
+
 
 # === validate_command ===
 
@@ -192,12 +198,12 @@ class TestResolvePath:
         ws.mkdir()
         backend = CustomSandboxBackend(root_dir=str(ws), virtual_mode=True)
         resolved = backend._resolve_path("/Users/someone/experiment-1/data/out.csv")
-        assert str(resolved).endswith("data/out.csv")
+        assert Path(resolved).as_posix().endswith("data/out.csv")
 
     def test_normal_virtual_path(self, tmp_workspace):
         backend = CustomSandboxBackend(root_dir=tmp_workspace, virtual_mode=True)
         resolved = backend._resolve_path("/src/main.py")
-        assert str(resolved).endswith("src/main.py")
+        assert Path(resolved).as_posix().endswith("src/main.py")
 
 
 # === CustomSandboxBackend.id ===
@@ -228,6 +234,7 @@ class TestSandboxId:
 # === execute() literal cwd sanitization ===
 
 
+@pytest.mark.skipif(not POSIX_SHELL, reason="Requires POSIX shell (mkdir -p, &&)")
 class TestExecuteCwdSanitization:
     def test_literal_workspace_path_replaced(self, tmp_workspace):
         """execute() should replace literal workspace root path with ./"""
@@ -251,7 +258,8 @@ class TestExecuteTruncation:
             max_output_bytes=100,
         )
         # Generate output larger than 100 bytes
-        resp = backend.execute("python3 -c \"print('A' * 200)\"")
+        code = "print('A' * 200)"
+        resp = backend.execute(f'{sys.executable} -c {json.dumps(code)}')
         assert resp.truncated is True
         assert "... Output truncated at 100 bytes" in resp.output
         # Output body (before truncation message) should be ≤ 100 bytes
@@ -278,9 +286,8 @@ class TestExecuteStderr:
             root_dir=tmp_workspace,
             virtual_mode=True,
         )
-        resp = backend.execute(
-            "python3 -c \"import sys; sys.stderr.write('warning\\n')\""
-        )
+        code = "import sys; sys.stderr.write('warning\n')"
+        resp = backend.execute(f"{sys.executable} -c {json.dumps(code)}")
         assert "[stderr] warning" in resp.output
 
     def test_execute_nonzero_exit_code_in_output(self, tmp_workspace):
@@ -288,7 +295,9 @@ class TestExecuteStderr:
             root_dir=tmp_workspace,
             virtual_mode=True,
         )
-        resp = backend.execute('python3 -c "raise SystemExit(42)"')
+        resp = backend.execute(
+            f"{sys.executable} -c {json.dumps('raise SystemExit(42)')}"
+        )
         assert resp.exit_code == 42
         assert "Exit code: 42" in resp.output
 
@@ -297,9 +306,8 @@ class TestExecuteStderr:
             root_dir=tmp_workspace,
             virtual_mode=True,
         )
-        resp = backend.execute(
-            "python3 -c \"import sys; print('out'); sys.stderr.write('err\\n')\""
-        )
+        code = "import sys; print('out'); sys.stderr.write('err\n')"
+        resp = backend.execute(f"{sys.executable} -c {json.dumps(code)}")
         assert "out" in resp.output
         assert "[stderr] err" in resp.output
 
@@ -519,6 +527,7 @@ class TestAbsolutePathDetection:
 # === execute() timeout recovery guidance ===
 
 
+@pytest.mark.skipif(not POSIX_SHELL, reason="Requires POSIX sleep and timeout exit 124")
 class TestExecuteTimeoutRecovery:
     def test_timeout_includes_recovery_guidance(self, tmp_workspace):
         backend = CustomSandboxBackend(root_dir=tmp_workspace, timeout=1)
@@ -538,8 +547,12 @@ class TestExecuteTimeoutRecovery:
         resp = backend.execute("sleep 10")
         assert "timed out" in resp.output.lower()
 
+
+class TestExecuteNonTimeout:
     def test_non_timeout_not_enhanced(self, tmp_workspace):
         backend = CustomSandboxBackend(root_dir=tmp_workspace)
-        resp = backend.execute("python3 -c 'raise SystemExit(1)'")
+        resp = backend.execute(
+            f"{sys.executable} -c {json.dumps('raise SystemExit(1)')}"
+        )
         assert resp.exit_code == 1
         assert "Recovery" not in resp.output

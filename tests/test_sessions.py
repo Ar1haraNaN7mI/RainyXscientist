@@ -43,8 +43,9 @@ class TestGenerateThreadId(unittest.TestCase):
 class TestGetDbPath(unittest.TestCase):
     def test_uses_data_dir(self):
         path = get_db_path()
-        assert str(path).endswith("sessions.db")
-        assert ".Rxscientist" in str(path)
+        assert path.name == "sessions.db"
+        resolved_parent = path.resolve().parent
+        assert any(".Rxscientist" in part for part in resolved_parent.parts)
 
 
 class TestFormatRelativeTime(unittest.TestCase):
