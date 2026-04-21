@@ -84,8 +84,6 @@ all-channels = [
 
 [project.scripts]
 Rxscientist = "Rxscientist.cli:main"
-Rxscientist = "Rxscientist.cli:main"
-rxsci = "Rxscientist.cli:main"
 rxsci = "Rxscientist.cli:main"
 
 [build-system]
