@@ -13,7 +13,12 @@ maintainers = [
 ]
 keywords = ["ai-scientific", "scientific-discovery", "self-evolving", "ai-scientists", "end-to-end"]
 classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Science/Research",
     "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3 :: Only",
 ]
 dependencies = [
     "deepagents>=0.5.3",
@@ -78,9 +83,10 @@ all-channels = [
 ]
 
 [project.urls]
-"Homepage" = "https://github.com/Rxscientist/Rxscientist"
-"Bug Tracker" = "https://github.com/Rxscientist/Rxscientist/issues"
-"Documentation" = "https://github.com/Rxscientist/Rxscientist#readme"
+Homepage = "https://github.com/Ar1haraNaN7mI/RainyXscientist"
+Repository = "https://github.com/Ar1haraNaN7mI/RainyXscientist"
+"Bug Tracker" = "https://github.com/Ar1haraNaN7mI/RainyXscientist/issues"
+Documentation = "https://github.com/Ar1haraNaN7mI/RainyXscientist#readme"
 
 [project.scripts]
 Rxscientist = "Rxscientist.cli:main"
@@ -91,9 +97,10 @@ requires = ["setuptools>=68.0"]
 build-backend = "setuptools.build_meta"
 
 [tool.setuptools.packages.find]
-include = ["Rxscientist*", "Rxscientist*"]
+include = ["Rainscientist*", "Rxscientist*"]
 
 [tool.setuptools.package-data]
+Rainscientist = ["subagent.yaml", "skills/**/*"]
 Rxscientist = ["subagent.yaml", "skills/**/*"]
 
 [tool.pytest.ini_options]
