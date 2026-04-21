@@ -17,21 +17,29 @@ WELCOME_SLOGANS = [
     "Ideas in. Discoveries out.",
 ]
 
-# ASCII art logo — shared by both Rich CLI and Textual TUI banners.
+# ASCII art logo — FIGlet "big" font (RXSCIENTIST); taller glyphs than the old flat-wide style.
+# Shared by both Rich CLI and Textual TUI banners.
 LOGO_LINES = (
-    ".-------.    _____     __   .-'''-.     _______  .-./`)     .-''-.  ,---.   .--.,---------. .-./`)    .-'''-. ,---------.  ",
-    "|  _ _   \\   \\   _\\   /  / / _     \\   /   __  \\ \\ .-.')  .'_ _   \\ |    \\  |  |\\          \\\\ .-.')  / _     \\\\          \\ ",
-    "| ( ' )  |   .-./ ). /  ' (`' )/`--'  | ,_/  \\__)/ `-' \\ / ( ` )   '|  ,  \\ |  | `--.  ,---'/ `-' \\ (`' )/`--' `--.  ,---' ",
-    "|(_ o _) /   \\ '_ .') .' (_ o _).   ,-./  )       `-'`\"`. (_ o _)  ||  |\\_ \\|  |    |   \\    `-'`\"`(_ o _).       |   \\    ",
-    "| (_,_).' __(_ (_) _) '   (_,_). '. \\  '_ '`)     .---. |  (_,_)___||  _( )_\\  |    :_ _:    .---.  (_,_). '.     :_ _:    ",
-    "|  |\\ \\  |  | /    \\   \\ .---.  \\  : > (_)  )  __ |   | '  \\   .---.| (_ o _)  |    (_I_)    |   | .---.  \\  :    (_I_)    ",
-    "|  | \\ `'   / `-'`-'    \\\\    `-'  |(  .  .-'_/  )|   |  \\  `-'    /|  (_,_)\\  |   (_(=)_)   |   | \\    `-'  |   (_(=)_)   ",
-    "|  |  \\    / /  /   \\    \\\\       /  `-'`-'     / |   |   \\       / |  |    |  |    (_I_)    |   |  \\       /     (_I_)    ",
-    "''-'   `'-' '--'     '----'`-...-'     `._____.'  '---'    `'-..-'  '--'    '--'    '---'    '---'   `-...-'      '---'    ",
+    " _____  __   __ _____  _____ _____ ______ _   _ _______ _____  _____ _______ ",
+    "|  __ \\ \\ \\ / // ____|/ ____|_   _|  ____| \\ | |__   __|_   _|/ ____|__   __|",
+    "| |__) | \\ V /| (___ | |      | | | |__  |  \\| |  | |    | | | (___    | |   ",
+    "|  _  /   > <  \\___ \\| |      | | |  __| | . ` |  | |    | |  \\___ \\   | |   ",
+    "| | \\ \\  / . \\ ____) | |____ _| |_| |____| |\\  |  | |   _| |_ ____) |  | |   ",
+    "|_|  \\_\\/_/ \\_\\_____/ \\_____|_____|______|_| \\_|  |_|  |_____|_____/   |_|   ",
 )
 
-# Blue gradient: deep navy -> royal blue -> sky blue -> cyan
-LOGO_GRADIENT = ["#1a237e", "#1565c0", "#1e88e5", "#42a5f5", "#64b5f6", "#90caf9"]
+# Distinct rainbow hues (one band per logo row, cycled if more lines are added later).
+LOGO_RAINBOW = [
+    "#ff1744",  # red
+    "#ff6d00",  # orange
+    "#ffd600",  # yellow
+    "#00e676",  # green
+    "#00b0ff",  # light blue
+    "#651fff",  # violet
+]
+
+# Back-compat alias (blue gradient); prefer LOGO_RAINBOW + itertools.cycle in banners.
+LOGO_GRADIENT = LOGO_RAINBOW
 
 
 def build_metadata(workspace_dir: str | None, model: str | None) -> dict:

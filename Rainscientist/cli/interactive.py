@@ -6,6 +6,7 @@ import queue
 import random
 import sys
 from datetime import datetime
+from itertools import cycle
 from typing import Any
 
 import Rxscientist.cli.channel as _ch_mod
@@ -41,7 +42,7 @@ from ..sessions import (
     thread_exists,
 )
 from ..stream.display import console
-from ._constants import LOGO_GRADIENT, LOGO_LINES, WELCOME_SLOGANS, build_metadata
+from ._constants import LOGO_LINES, LOGO_RAINBOW, WELCOME_SLOGANS, build_metadata
 from .agent import _create_session_workspace, _load_agent, _shorten_path
 from .channel import (
     ChannelMessage,
@@ -98,8 +99,8 @@ def print_banner(
     ui_backend: str | None = None,
 ):
     """Print welcome banner with ASCII art logo, info line, and hint."""
-    for line, color in zip(LOGO_LINES, LOGO_GRADIENT, strict=False):
-        console.print(Text(line, style=f"{color} bold"))
+    for line, color in zip(LOGO_LINES, cycle(LOGO_RAINBOW), strict=False):
+        console.print(Text(line, style=f"bold {color}"))
     info = Text()
     info.append("  ", style="dim")
     parts: list[tuple[str, str]] = []

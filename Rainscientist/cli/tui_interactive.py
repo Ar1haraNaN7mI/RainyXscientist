@@ -13,6 +13,7 @@ import random
 import sys
 from collections.abc import Callable
 from datetime import datetime
+from itertools import cycle
 from typing import Any, ClassVar
 
 import Rxscientist.cli.channel as _ch_mod
@@ -32,7 +33,7 @@ from ..sessions import (
 )
 from ..stream.events import stream_agent_events
 from ..stream.state import _INTERNAL_TOOLS, StreamState
-from ._constants import LOGO_GRADIENT, LOGO_LINES, WELCOME_SLOGANS, build_metadata
+from ._constants import LOGO_LINES, LOGO_RAINBOW, WELCOME_SLOGANS, build_metadata
 from .channel import (
     ChannelMessage,
     _auto_start_channel,
@@ -85,7 +86,7 @@ def _build_welcome_banner(
         channels: List of (name, ok, detail) tuples for the channels panel.
     """
     banner = Text()
-    for line, color in zip(LOGO_LINES, LOGO_GRADIENT, strict=False):
+    for line, color in zip(LOGO_LINES, cycle(LOGO_RAINBOW), strict=False):
         banner.append(f"{line}\n", style=f"bold {color}")
 
     # Info line — matches CLI print_banner format

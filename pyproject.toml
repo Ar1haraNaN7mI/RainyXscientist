@@ -1,6 +1,6 @@
 [project]
 name = "Rxscientist"
-version = "0.0.8"
+version = "0.0.9"
 description = "Rxscientist: Towards Self-Evolving AI Scientists for End-to-End Scientific Discovery"
 readme = "README.md"
 requires-python = ">=3.11"
