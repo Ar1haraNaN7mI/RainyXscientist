@@ -259,7 +259,7 @@ class TestExecuteTruncation:
         )
         # Generate output larger than 100 bytes
         code = "print('A' * 200)"
-        resp = backend.execute(f'{sys.executable} -c {json.dumps(code)}')
+        resp = backend.execute(f"{sys.executable} -c {json.dumps(code)}")
         assert resp.truncated is True
         assert "... Output truncated at 100 bytes" in resp.output
         # Output body (before truncation message) should be ≤ 100 bytes

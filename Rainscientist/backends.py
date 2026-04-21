@@ -225,8 +225,14 @@ def convert_virtual_paths_in_command(
         'mkdir -p ./dir'
     """
 
+    # Do not rewrite the interpreter / executable token (e.g. ``/usr/bin/python3``),
+    # otherwise absolute ``sys.executable`` paths become broken ``./usr/...`` paths.
+    exe_offsets = _collect_executable_positions(command)
+
     def replace_virtual_path(match: re.Match[str]) -> str:
         path = match.group(0)
+        if match.start() in exe_offsets:
+            return path
 
         # Skip content that looks like a URL
         if "://" in command[max(0, match.start() - 10) : match.end() + 10]:

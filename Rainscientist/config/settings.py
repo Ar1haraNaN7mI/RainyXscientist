@@ -493,7 +493,5 @@ def apply_config_to_env(config: RxscientistConfig) -> None:
         os.environ["TAVILY_API_KEY"] = config.tavily_api_key
     if config.reasoning_effort and not os.environ.get("Rxscientist_REASONING_EFFORT"):
         os.environ["Rxscientist_REASONING_EFFORT"] = config.reasoning_effort
-    if config.use_responses_api and not os.environ.get(
-        "Rxscientist_USE_RESPONSES_API"
-    ):
+    if config.use_responses_api and not os.environ.get("Rxscientist_USE_RESPONSES_API"):
         os.environ["Rxscientist_USE_RESPONSES_API"] = config.use_responses_api

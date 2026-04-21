@@ -889,9 +889,7 @@ class TestUvToolCompat:
         venv = tmp_path / "uv" / "tools" / "Rxscientist"
         venv.mkdir(parents=True)
         receipt = venv / "uv-receipt.toml"
-        receipt.write_text(
-            '[tool]\nrequirements = [\n  { name = "Rxscientist" },\n]\n'
-        )
+        receipt.write_text('[tool]\nrequirements = [\n  { name = "Rxscientist" },\n]\n')
         monkeypatch.setenv("VIRTUAL_ENV", str(venv))
         assert reg._uv_tool_existing_requirements() == {}
 
@@ -1076,9 +1074,7 @@ class TestUvToolCompat:
         venv = tmp_path / "uv" / "tools" / "Rxscientist"
         venv.mkdir(parents=True)
         receipt = venv / "uv-receipt.toml"
-        receipt.write_text(
-            '[tool]\nrequirements = [\n  { name = "Rxscientist" },\n]\n'
-        )
+        receipt.write_text('[tool]\nrequirements = [\n  { name = "Rxscientist" },\n]\n')
         monkeypatch.setenv("VIRTUAL_ENV", str(venv))
 
         commands: list[list[str]] = []
@@ -1111,9 +1107,7 @@ class TestUvToolCompat:
         venv = tmp_path / "uv" / "tools" / "Rxscientist"
         venv.mkdir(parents=True)
         receipt = venv / "uv-receipt.toml"
-        receipt.write_text(
-            '[tool]\nrequirements = [\n  { name = "Rxscientist" },\n]\n'
-        )
+        receipt.write_text('[tool]\nrequirements = [\n  { name = "Rxscientist" },\n]\n')
         monkeypatch.setenv("VIRTUAL_ENV", str(venv))
 
         commands: list[list[str]] = []

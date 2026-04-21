@@ -169,9 +169,7 @@ def set_workspace_root(path: str | Path) -> None:
         or GLOBAL_MEMORIES_DIR
     )
     MEMORY_DIR = MEMORIES_DIR
-    USER_SKILLS_DIR = _env_path("Rxscientist_SKILLS_DIR") or (
-        WORKSPACE_ROOT / "skills"
-    )
+    USER_SKILLS_DIR = _env_path("Rxscientist_SKILLS_DIR") or (WORKSPACE_ROOT / "skills")
     MEDIA_DIR = _env_path("Rxscientist_MEDIA_DIR") or (WORKSPACE_ROOT / "media")
 
 
