@@ -7,11 +7,11 @@ workspace settings, and agent parameters. Uses flow-style arrow-key selection UI
 from __future__ import annotations
 
 import os
-from typing import Any
 import shutil
 import subprocess
 import sys
 from pathlib import Path
+from typing import Any
 
 import questionary
 from prompt_toolkit.formatted_text import FormattedText

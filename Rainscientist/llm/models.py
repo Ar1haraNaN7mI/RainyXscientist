@@ -53,8 +53,7 @@ def _is_official_anthropic_cloud_url(raw: str) -> bool:
         return True
     try:
         netloc = urlparse(raw).netloc.split(":")[0].lower()
-        if netloc.startswith("www."):
-            netloc = netloc[4:]
+        netloc = netloc.removeprefix("www.")
         return netloc in _OFFICIAL_ANTHROPIC_NETLOCS
     except Exception:
         return False
