@@ -71,7 +71,7 @@ After `uv sync`, activate `.venv` if you prefer and run `rxsci` from that enviro
 2. Install with the Python you plan to use:
 
 ```bash
-pip install /path/to/Rxscientist-*-py3-none-any.whl
+pip install /path/to/Rxscientist-0.0.10-py3-none-any.whl
 ```
 
 Replace the filename with the asset you downloaded.
@@ -214,29 +214,28 @@ After `uv sync`, you can also activate the virtualenv (`.venv`) and run `rxsci` 
 
 ### Option D — Install from GitHub Release wheel (offline-friendly)
 
-Each successful push to `main` publishes **wheel / sdist** to **PyPI** and attaches the same builds to [GitHub Releases](https://github.com/Ar1haraNaN7mI/RainyXscientist/releases) (tag `v0.0.<run_id>.<run_attempt>`). There is **no standalone `.exe`** in those assets (they are Python packages).
+Each push to `main` publishes **wheel / sdist** assets under [Releases](https://github.com/Ar1haraNaN7mI/RainyXscientist/releases). There is **no standalone `.exe`** in those assets (they are Python packages).
 
 1. Open the latest Release and download **`Rxscientist-*-py3-none-any.whl`** (and optionally the `.tar.gz` source distribution).
 2. Install with pip (use the same Python where you want `rxsci`):
 
 ```bash
-pip install "C:\path\to\Rxscientist-*-py3-none-any.whl"
+pip install "C:\path\to\Rxscientist-0.0.10-py3-none-any.whl"
 rxsci
 ```
 
-Replace the path and filename with the asset you actually downloaded (version is in the file name).
+Replace the path and version string with the file you actually downloaded.
 
 ### Publishing to PyPI (maintainers)
 
-**`.github/workflows/build.yml`** runs on every **push to `main`**: after the QA job passes, the **build-and-release** job sets a unique PyPI version **`0.0.<run_id>.<run_attempt>`** (injected into `pyproject.toml` in CI only; the repository keeps a **`0.0.0` placeholder**), runs **`uv build`**, publishes **`dist/*`** to PyPI, then creates a [GitHub Release](https://github.com/Ar1haraNaN7mI/RainyXscientist/releases) tagged **`v0.0.<run_id>.<run_attempt>`** with the same artifacts. **No manual version bumps or tag pushes** are required for the default flow.
+This repo includes **`.github/workflows/publish-pypi.yml`**. One-time setup:
 
-One-time **GitHub secret** (required for CI uploads): create a **PyPI API token** at [pypi.org → Account settings → API tokens](https://pypi.org/manage/account/) with **Entire account** or project-scoped upload rights for **`Rxscientist`**. In this GitHub repository → **Settings** → **Secrets and variables** → **Actions** → add **`PYPITOKENKEY`** with the token value (matches `.github/workflows/build.yml`). The workflow uses **`__token__`** as the PyPI user name for API tokens.
+1. Create accounts on [pypi.org](https://pypi.org) (and optionally [test.pypi.org](https://test.pypi.org) for trials).
+2. Confirm the project name **`Rxscientist`** is available on PyPI (change `[project] name` in `pyproject.toml` if it is taken).
+3. On PyPI → **Publishing** → **Add a new pending publisher** → choose **GitHub** → organization/user **`Ar1haraNaN7mI`**, repository **`RainyXscientist`**, workflow **`publish-pypi.yml`**, PyPI project **`Rxscientist`** (must match `pyproject.toml`).
+4. Bump **`version`** in `pyproject.toml`, commit, create and push an annotated tag **`vX.Y.Z`** matching that version (example: version `0.0.10` → tag **`v0.0.10`**). The workflow runs `uv build` and uploads **`dist/*`** to PyPI.
 
-Project name on PyPI must be **`Rxscientist`**; change `[project] name` in `pyproject.toml` if the name is taken on first publish.
-
-**Optional:** you can also configure [PyPI trusted publishing (OIDC)](https://docs.pypi.org/trusted-publishers/) for the same service account and switch the workflow to OIDC later if you prefer not to store a long-lived token.
-
-Manual upload (same token locally, different version in `pyproject.toml` for each upload if not using CI):
+Manual upload (API token):
 
 ```bash
 uv build
@@ -294,7 +293,7 @@ python -m Rxscientist
 3. 在下载目录执行（版本号按文件名修改）：
 
 ```powershell
-py -3.12 -m pip install .\Rxscientist-*-py3-none-any.whl
+py -3.12 -m pip install .\Rxscientist-0.0.10-py3-none-any.whl
 rxsci
 ```
 
@@ -331,18 +330,20 @@ uv run rxsci
 
 1. **账号**：在 [pypi.org](https://pypi.org) 注册并完成邮箱验证。
 2. **项目名**：打开 <https://pypi.org/project/Rxscientist/> ，若已被占用需在 `pyproject.toml` 里修改 **`[project] name`**（例如换成唯一名称）。
-3. **GitHub 仓库秘密变量（CI 发 PyPI 必配）**  
-   - 在 [PyPI 账户](https://pypi.org/manage/account/) 创建 **API token**（整站或仅 **`Rxscientist`** 项目上传权限）。  
-   - 在 GitHub 本仓库：**Settings → Secrets and variables → Actions**，新增 **`PYPITOKENKEY`**，值为该 token（与工作流中名称一致）。  
-4. **发版（默认全自动化）**：向 **`main` 分支推送** 且通过 QA 后，**`build.yml`** 用 **`PYPITOKENKEY`** 在 CI 中写入唯一版本号 **`0.0.<run_id>.<run_attempt>`**，**`uv build`** 并上传 PyPI，再创建带同名 **`v0.0.…` 标签** 的 GitHub Release。仓库中 **`version` 为占位 `0.0.0`**，无需为发版手改版本号或打标签。  
-5. **本地用同一 token 上传（备用）**：切勿把 token 写进仓库。本地发版前在 `pyproject.toml` 中设好 **不与其他已上传版本冲突** 的 `version`：
+3. **可信发布（推荐，无需把 token 放进仓库）**  
+   - PyPI：**Account settings → Publishing → Add pending publisher**  
+   - 选择 GitHub：**Owner** `Ar1haraNaN7mI`，**Repository** `RainyXscientist`，**Workflow** `publish-pypi.yml`，**PyPI project name** `Rxscientist`（须与 `pyproject.toml` 一致）。  
+   - 详见官方说明：<https://docs.pypi.org/trusted-publishers/>
+4. **发版**：在 `pyproject.toml` 里提高 **`version`**，提交后打标签 **`v` + 语义化版本号**（例如版本 `0.0.10` → 标签 **`v0.0.10`**），推送标签将触发 **`.github/workflows/publish-pypi.yml`**，自动 **`uv build`** 并上传到 PyPI。  
+   也可在 GitHub **Actions → Publish PyPI → Run workflow** 手动运行（同样需要已配置可信发布）。
+5. **本地用令牌上传（备用）**：在 PyPI 账户设置里创建 **API token**，切勿提交到 Git：
 
 ```bash
 uv build
 uv publish --token <粘贴token>
 ```
 
-PyPI 禁止重复上传同一版本；CI 已用 `run_id` 与 `run_attempt` 保证每次推送唯一。
+同一版本号不能重复上传；每次发布前务必 **递增 `version`**。
 
 ---
 

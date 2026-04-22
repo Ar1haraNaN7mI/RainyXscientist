@@ -1,0 +1,38 @@
+# Publish source/wheel distributions to PyPI using trusted publishing (OIDC).
+#
+# Setup (once): https://docs.pypi.org/trusted-publishers/
+# PyPI → Your account → Publishers → Add → GitHub → this repo → workflow file: publish-pypi.yml
+
+name: Publish PyPI
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      # Semantic versions only (matches pyproject version bumps)
+      - "v[0-9]*.[0-9]*.[0-9]*"
+
+permissions:
+  contents: read
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      id-token: write
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: astral-sh/setup-uv@v8.1.0
+        with:
+          python-version: "3.11"
+          cache-dependency-glob: "**/pyproject.toml"
+
+      - name: Build sdist and wheel
+        run: uv build
+
+      - name: Publish to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          packages-dir: dist/
