@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import os
 from typing import Any
+from urllib.parse import urlparse
 
 from langchain.chat_models import init_chat_model
 
@@ -32,6 +33,32 @@ _DASHSCOPE_BASE_URL = "https://dashscope.aliyuncs.com/compatible-mode/v1"
 _DEEPSEEK_BASE_URL = "https://api.deepseek.com"
 _MOONSHOT_BASE_URL = "https://api.moonshot.cn/v1"
 _KIMI_CODING_BASE_URL = "https://api.kimi.com/coding/"
+
+# Hostnames that support Anthropic Cloud features (thinking, betas). Third-party
+# mirrors must not send those — many return 401 / invalid token when present.
+_OFFICIAL_ANTHROPIC_NETLOCS = frozenset({"api.anthropic.com"})
+
+
+def _effective_anthropic_base_url(kwargs: dict[str, Any]) -> str:
+    """Resolved REST base URL for native Anthropic (kwargs win over ``os.environ``)."""
+    k = kwargs.get("base_url")
+    if isinstance(k, str) and k.strip():
+        return k.strip()
+    return (os.environ.get("ANTHROPIC_BASE_URL", "") or "").strip()
+
+
+def _is_official_anthropic_cloud_url(raw: str) -> bool:
+    """Return True when *raw* is empty (SDK default) or points at Anthropic Cloud."""
+    if not (raw or "").strip():
+        return True
+    try:
+        netloc = urlparse(raw).netloc.split(":")[0].lower()
+        if netloc.startswith("www."):
+            netloc = netloc[4:]
+        return netloc in _OFFICIAL_ANTHROPIC_NETLOCS
+    except Exception:
+        return False
+
 
 # Providers routed through the OpenAI provider with a custom base_url.
 # Maps provider name → (base_url or None, env var for API key).
@@ -218,13 +245,19 @@ def _apply_auto_config(
         # Detect local proxy (e.g. ccproxy): thinking blocks in conversation
         # history cause 422 errors because the proxy doesn't accept 'thinking'
         # as a valid content block type on round-trip.
+        # Third-party Anthropic-compatible gateways (e.g. regional mirrors) also
+        # reject thinking/beta payloads — often as 401 \"Invalid token\".
         if not is_third_party:
-            base_url = os.environ.get("ANTHROPIC_BASE_URL", "")
-            _is_proxy = "127.0.0.1" in base_url or "localhost" in base_url
+            eff = _effective_anthropic_base_url(kwargs)
+            _is_proxy = (
+                "127.0.0.1" in eff
+                or "localhost" in eff
+                or (bool(eff) and not _is_official_anthropic_cloud_url(eff))
+            )
         else:
             _is_proxy = False
         if _is_proxy or (is_third_party and not _supports_thinking):
-            pass
+            kwargs["thinking"] = None
         elif model_id.endswith(("4-6", "4-7")):
             kwargs["thinking"] = {"type": "adaptive"}
             kwargs.setdefault("effort", "max")
@@ -310,9 +343,18 @@ def get_chat_model(
     _is_openai_proxy = False
     _original_provider: str | None = None
     if provider == "anthropic":
-        base_url = os.environ.get("ANTHROPIC_BASE_URL", "")
+        base_url = (os.environ.get("ANTHROPIC_BASE_URL", "") or "").strip()
+        if not base_url:
+            try:
+                from ..config.settings import load_config
+
+                base_url = (load_config().anthropic_base_url or "").strip()
+            except Exception:
+                base_url = ""
         if base_url:
+            base_url = base_url.rstrip("/")
             kwargs["base_url"] = base_url
+            os.environ.setdefault("ANTHROPIC_BASE_URL", base_url)
         api_key = os.environ.get("ANTHROPIC_API_KEY", "")
         if api_key:
             kwargs["api_key"] = api_key

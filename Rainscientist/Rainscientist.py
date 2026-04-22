@@ -65,10 +65,12 @@ _Rxscientist_agent = None
 
 def _ensure_config(config=None):
     """Return cached config.  If *config* is passed, cache and use it."""
-    global _config
+    global _config, _chat_model
     if config is not None:
         _config = config
         apply_config_to_env(_config)
+        # New CLI session config (e.g. anthropic_base_url): rebuild cached chat model.
+        _chat_model = None
     if _config is None:
         _config = get_effective_config()
         apply_config_to_env(_config)

@@ -7,6 +7,7 @@ workspace settings, and agent parameters. Uses flow-style arrow-key selection UI
 from __future__ import annotations
 
 import os
+from typing import Any
 import shutil
 import subprocess
 import sys
@@ -161,11 +162,41 @@ class ChoiceValidator(Validator):
 # =============================================================================
 
 
-def validate_anthropic_key(api_key: str) -> tuple[bool, str]:
-    """Validate an Anthropic API key by making a test request.
+def _anthropic_probe_messages(client: Any) -> tuple[bool, str]:
+    """Last-resort auth check when GET /v1/models is unavailable on the gateway."""
+    try:
+        import anthropic
+
+        client.messages.create(
+            model="",
+            max_tokens=1,
+            messages=[{"role": "user", "content": "hi"}],
+        )
+        return True, "Valid"
+    except anthropic.AuthenticationError:
+        return False, "Invalid API key"
+    except anthropic.APIStatusError as e:
+        if getattr(e, "status_code", None) == 401:
+            return False, "Invalid API key"
+        # Invalid model / schema errors mean the gateway accepted the key
+        return True, "Valid"
+    except Exception as e:
+        return False, f"Error: {e}"
+
+
+def validate_anthropic_key(
+    api_key: str,
+    *,
+    base_url: str | None = None,
+) -> tuple[bool, str]:
+    """Validate an Anthropic API key via the Messages API or models list.
+
+    Honors ``base_url`` and ``ANTHROPIC_BASE_URL`` so mirrors / proxies work.
+    Gateways that omit ``models.list`` fall back to a minimal Messages probe.
 
     Args:
-        api_key: The API key to validate.
+        api_key: API key string.
+        base_url: Anthropic-compatible base URL (omit for api.anthropic.com).
 
     Returns:
         Tuple of (is_valid, message).
@@ -173,17 +204,49 @@ def validate_anthropic_key(api_key: str) -> tuple[bool, str]:
     if not api_key:
         return True, "Skipped (no key provided)"
 
+    key = api_key.strip()
+    resolved = (base_url or os.environ.get("ANTHROPIC_BASE_URL") or "").strip() or None
+
     try:
         import anthropic
 
-        client = anthropic.Anthropic(api_key=api_key)
-        # Make a minimal request to validate the key
-        client.models.list()
-        return True, "Valid"
+        kwargs: dict[str, Any] = {"api_key": key}
+        if resolved:
+            kwargs["base_url"] = resolved.rstrip("/")
+
+        client = anthropic.Anthropic(**kwargs)
+
+        try:
+            client.models.list()
+            return True, "Valid"
+        except anthropic.AuthenticationError:
+            return False, _anthropic_invalid_key_message(bool(resolved))
+        except AttributeError:
+            return _anthropic_probe_messages(client)
+        except anthropic.APIStatusError as e:
+            code = getattr(e, "status_code", None)
+            if code == 401:
+                return False, _anthropic_invalid_key_message(bool(resolved))
+            if code in (404, 405, 501):
+                return _anthropic_probe_messages(client)
+            return False, f"API error ({code}): {e}"
     except anthropic.AuthenticationError:
-        return False, "Invalid API key"
+        return False, _anthropic_invalid_key_message(bool(resolved))
     except Exception as e:
+        err = str(e).lower()
+        if "401" in err or "authentication" in err or "invalid api key" in err:
+            return False, _anthropic_invalid_key_message(bool(resolved))
         return False, f"Error: {e}"
+
+
+def _anthropic_invalid_key_message(endpoint_customized: bool) -> str:
+    if endpoint_customized:
+        return "Invalid API key or wrong base URL"
+    return (
+        "Invalid API key — confirm the key at console.anthropic.com; "
+        "if you use a mirror/proxy, set Anthropic API base URL in onboarding or "
+        "ANTHROPIC_BASE_URL"
+    )
 
 
 def validate_openai_key(api_key: str) -> tuple[bool, str]:
@@ -820,11 +883,17 @@ def _step_minimax_region(config: RxscientistConfig) -> str:
 
 def _provider_key_info(config: RxscientistConfig, provider: str):
     """Return (display_name, current_value, validate_fn) for a provider."""
+
+    def _anthropic_validate(key: str) -> tuple[bool, str]:
+        base = config.anthropic_base_url or os.environ.get("ANTHROPIC_BASE_URL", "")
+        base = base.strip() if base else ""
+        return validate_anthropic_key(key, base_url=base or None)
+
     mapping = {
         "anthropic": (
             "Anthropic",
             config.anthropic_api_key or os.environ.get("ANTHROPIC_API_KEY", ""),
-            validate_anthropic_key,
+            _anthropic_validate,
         ),
         "minimax": (
             "MiniMax",
@@ -1125,6 +1194,24 @@ def _step_anthropic_auth_mode(config: RxscientistConfig) -> str:
                 _run_ccproxy_login("claude_api", "OAuth")
 
     return auth_mode
+
+
+def _step_anthropic_api_base_url(config: RxscientistConfig) -> None:
+    """Optional Anthropic-compatible base URL (mirror, gateway, enterprise proxy).
+
+    Leave empty to use the official ``api.anthropic.com`` endpoint. The value is
+    stored as ``anthropic_base_url`` and applied to key validation before the key step.
+    """
+    current = (config.anthropic_base_url or os.environ.get("ANTHROPIC_BASE_URL", "")).strip()
+    raw = questionary.text(
+        "Anthropic API base URL — empty for official api.anthropic.com; mirrors/proxies paste full URL:",
+        default=current,
+        style=WIZARD_STYLE,
+        qmark=QMARK,
+    ).ask()
+    if raw is None:
+        raise KeyboardInterrupt()
+    config.anthropic_base_url = raw.strip()
 
 
 def _step_openai_auth_mode(config: RxscientistConfig) -> str:
@@ -2909,6 +2996,8 @@ def run_onboard(skip_validation: bool = False) -> bool:
         if provider == "anthropic":
             auth_mode = _step_anthropic_auth_mode(config)
             config.anthropic_auth_mode = auth_mode
+            if auth_mode == "api_key":
+                _step_anthropic_api_base_url(config)
         elif provider == "openai":
             auth_mode = _step_openai_auth_mode(config)
             config.openai_auth_mode = auth_mode
