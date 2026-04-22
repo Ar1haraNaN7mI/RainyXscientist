@@ -71,7 +71,7 @@ After `uv sync`, activate `.venv` if you prefer and run `rxsci` from that enviro
 2. Install with the Python you plan to use:
 
 ```bash
-pip install /path/to/Rxscientist-0.0.11-py3-none-any.whl
+pip install /path/to/Rxscientist-0.0.10-py3-none-any.whl
 ```
 
 Replace the filename with the asset you downloaded.
@@ -220,7 +220,7 @@ Each push to `main` publishes **wheel / sdist** assets under [Releases](https://
 2. Install with pip (use the same Python where you want `rxsci`):
 
 ```bash
-pip install "C:\path\to\Rxscientist-0.0.11-py3-none-any.whl"
+pip install "C:\path\to\Rxscientist-0.0.10-py3-none-any.whl"
 rxsci
 ```
 
@@ -233,7 +233,7 @@ This repo includes **`.github/workflows/publish-pypi.yml`**. One-time setup:
 1. Create accounts on [pypi.org](https://pypi.org) (and optionally [test.pypi.org](https://test.pypi.org) for trials).
 2. Confirm the project name **`Rxscientist`** is available on PyPI (change `[project] name` in `pyproject.toml` if it is taken).
 3. On PyPI → **Publishing** → **Add a new pending publisher** → choose **GitHub** → organization/user **`Ar1haraNaN7mI`**, repository **`RainyXscientist`**, workflow **`publish-pypi.yml`**, PyPI project **`Rxscientist`** (must match `pyproject.toml`).
-4. Bump **`version`** in `pyproject.toml`, commit, create and push an annotated tag **`vX.Y.Z`** matching that version (example: version `0.0.11` → tag **`v0.0.11`**). The workflow runs `uv build` and uploads **`dist/*`** to PyPI.
+4. In GitHub: **Actions → Publish PyPI → Run workflow** (target branch, usually `main`). The workflow runs `scripts/pypi_next_version.py` to pick a **new patch version** that is not already on PyPI (avoids *file already exists*), updates `pyproject.toml` in the job, then `uv build` and uploads to PyPI. If the version was bumped, the workflow **commits and pushes** that `pyproject.toml` change to the same branch. You do not need to manually bump the version or push a `v*.*.*` tag for this workflow.
 
 Manual upload (API token):
 
@@ -293,7 +293,7 @@ python -m Rxscientist
 3. 在下载目录执行（版本号按文件名修改）：
 
 ```powershell
-py -3.12 -m pip install .\Rxscientist-0.0.11-py3-none-any.whl
+py -3.12 -m pip install .\Rxscientist-0.0.10-py3-none-any.whl
 rxsci
 ```
 
@@ -334,8 +334,7 @@ uv run rxsci
    - PyPI：**Account settings → Publishing → Add pending publisher**  
    - 选择 GitHub：**Owner** `Ar1haraNaN7mI`，**Repository** `RainyXscientist`，**Workflow** `publish-pypi.yml`，**PyPI project name** `Rxscientist`（须与 `pyproject.toml` 一致）。  
    - 详见官方说明：<https://docs.pypi.org/trusted-publishers/>
-4. **发版**：在 `pyproject.toml` 里提高 **`version`**，提交后打标签 **`v` + 语义化版本号**（例如版本 `0.0.11` → 标签 **`v0.0.11`**），推送标签将触发 **`.github/workflows/publish-pypi.yml`**，自动 **`uv build`** 并上传到 PyPI。  
-   也可在 GitHub **Actions → Publish PyPI → Run workflow** 手动运行（同样需要已配置可信发布）。
+4. **发版**：在 GitHub 打开 **Actions → Publish PyPI → Run workflow**（一般选 `main`）。工作流会运行 **`scripts/pypi_next_version.py`**，按 PyPI 上已有版本自动 **递 Patch**，避免 *File already exists*；在任务里更新 `pyproject.toml` 后执行 **`uv build`** 并上传。若版本有递增，工作流成功后会 **把新的 `version` 提交并推回** 对应分支。无需再手动改版本号或打 `v*.*.*` 标签来触发本工作流（标签推送 **不会** 再自动触发，以免与 PyPI 策略冲突）。
 5. **本地用令牌上传（备用）**：在 PyPI 账户设置里创建 **API token**，切勿提交到 Git：
 
 ```bash
@@ -343,7 +342,7 @@ uv build
 uv publish --token <粘贴token>
 ```
 
-同一版本号不能重复上传；每次发布前务必 **递增 `version`**。
+同一版本/同一 wheel 在 PyPI 上 **不可覆盖**；本仓库通过上述脚本在 CI 中自动选择下一个可用 **patch** 版本。若用本地 `uv publish`，请手工递增 **`pyproject.toml` 的 `version`** 后再上传。
 
 ---
 
