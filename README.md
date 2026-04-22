@@ -1,9 +1,9 @@
-# RXscientist
+# RainyXscientist
 
-RXscientist is a new project for end-to-end AI-assisted research execution.
+RainyXscientist is a new project for end-to-end AI-assisted research execution.
 It provides a practical command-line research copilot that can plan tasks, call tools, run multi-step workflows, and keep long-term session memory for iterative scientific work.
 
-## What RXscientist does
+## What RainyXscientist does
 
 - Multi-agent workflow for planning, research, coding, analysis, and writing.
 - CLI and TUI interfaces for interactive local work.
