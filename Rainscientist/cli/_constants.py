@@ -6,7 +6,7 @@ from ..sessions import AGENT_NAME
 
 WELCOME_SLOGANS = [
     "Ready for vibe research? What do you want cooking?",
-    "Science doesn't sleep. Neither do your sub-agents.",
+    "Science doesn't sleep. Neither do your agents.",
     "From hypothesis to paper — let's cook.",
     "Your research kitchen is ready. What's on the menu?",
     "Experiments don't run themselves. Oh wait — they do now.",
@@ -15,6 +15,12 @@ WELCOME_SLOGANS = [
     "What breakthrough are we cooking today?",
     "Harness the vibe. Start the research.",
     "Ideas in. Discoveries out.",
+    "Automating the grind so you can focus on the 'Eureka'.",
+    "Your lab, scaled. One prompt, a thousand simulations.",
+    "Parallelize your curiosity. The agents are standing by.",
+    "Let the agents handle the noise. You curate the signal.",
+    "Raw data is just ingredients. Let's turn it into a feast.",
+    "The frontier is just a prompt away.",
 ]
 
 # ASCII art logo — FIGlet "big" font (RXSCIENTIST); taller glyphs than the old flat-wide style.
