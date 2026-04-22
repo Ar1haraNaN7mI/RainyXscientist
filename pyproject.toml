@@ -1,6 +1,7 @@
 [project]
 name = "Rxscientist"
-version = "0.0.10"
+# Source checkout uses this placeholder. CI overwrites to 0.0.<run_id>.<run_attempt> before `uv build` and PyPI upload; do not bump for releases.
+version = "0.0.0"
 description = "Rxscientist: Towards Self-Evolving AI Scientists for End-to-End Scientific Discovery"
 readme = "README.md"
 requires-python = ">=3.11"
