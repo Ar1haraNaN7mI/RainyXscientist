@@ -1202,7 +1202,9 @@ def _step_anthropic_api_base_url(config: RxscientistConfig) -> None:
     Leave empty to use the official ``api.anthropic.com`` endpoint. The value is
     stored as ``anthropic_base_url`` and applied to key validation before the key step.
     """
-    current = (config.anthropic_base_url or os.environ.get("ANTHROPIC_BASE_URL", "")).strip()
+    current = (
+        config.anthropic_base_url or os.environ.get("ANTHROPIC_BASE_URL", "")
+    ).strip()
     raw = questionary.text(
         "Anthropic API base URL — empty for official api.anthropic.com; mirrors/proxies paste full URL:",
         default=current,

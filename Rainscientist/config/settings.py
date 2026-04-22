@@ -587,10 +587,9 @@ def apply_config_to_env(config: RxscientistConfig) -> None:
     Args:
         config: Configuration to apply.
     """
-    # Mirror merged config into env so LangChain picks up URLs/keys reliably.
-    if config.anthropic_api_key:
+    if config.anthropic_api_key and not os.environ.get("ANTHROPIC_API_KEY"):
         os.environ["ANTHROPIC_API_KEY"] = config.anthropic_api_key.strip()
-    if config.anthropic_base_url:
+    if config.anthropic_base_url and not os.environ.get("ANTHROPIC_BASE_URL"):
         os.environ["ANTHROPIC_BASE_URL"] = config.anthropic_base_url.strip().rstrip("/")
     if config.openai_api_key and not os.environ.get("OPENAI_API_KEY"):
         os.environ["OPENAI_API_KEY"] = config.openai_api_key

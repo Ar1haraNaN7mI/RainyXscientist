@@ -256,7 +256,7 @@ def _apply_auto_config(
         else:
             _is_proxy = False
         if _is_proxy or (is_third_party and not _supports_thinking):
-            kwargs["thinking"] = None
+            pass
         elif model_id.endswith(("4-6", "4-7")):
             kwargs["thinking"] = {"type": "adaptive"}
             kwargs.setdefault("effort", "max")
