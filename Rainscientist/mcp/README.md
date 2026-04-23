@@ -1,6 +1,6 @@
 # Model Context Protocol Integration
 
-> Connects external systems to [Rxscientist](https://github.com/Rxscientist/Rxscientist) via [Model Context Protocol (MCP)](https://modelcontextprotocol.io/).
+> Connects external systems to [RainyXscientist](https://github.com/Ar1haraNaN7mI/RainyXscientist) via [Model Context Protocol (MCP)](https://modelcontextprotocol.io/).
 
 > [!TIP]
 > Explore more servers: [MCP Server Directory](https://github.com/modelcontextprotocol/servers)

@@ -23,6 +23,7 @@ from rich.panel import Panel
 from rich.text import Text
 
 from ..llm import get_models_for_provider
+from ..paths import SKILLS_MARKETPLACE_REPO
 from .settings import (
     RxscientistConfig,
     get_config_path,
@@ -1655,7 +1656,7 @@ _RECOMMENDED_SKILLS = [
     # ── Official (Rxscientist) ──
     {
         "label": "rxsci Skills  (optimized for Rxscientist — paper planning, writing, review, etc.) 👈 Recommended",
-        "source": "Rxscientist/rxSkills@skills",
+        "source": f"{SKILLS_MARKETPLACE_REPO}@skills",
     },
     # ── Third-party (K-Dense) ──
     {

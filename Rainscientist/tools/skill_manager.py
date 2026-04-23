@@ -30,7 +30,7 @@ def skill_manager(
       Built-in skills evolve over time, so use action="list" to see the current set.
 
     action="browse" (optional tag):
-      Browse available skills from the rxSkills repository (Rxscientist/rxSkills).
+      Browse available skills from the default marketplace repository (paths.SKILLS_MARKETPLACE_REPO).
       Set tag to filter by category (e.g. tag="core", tag="writing", tag="experiments").
       Returns skill names, descriptions, tags, and install sources you can pass to action="install".
 

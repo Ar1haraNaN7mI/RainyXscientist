@@ -15,7 +15,7 @@
 ## Checklist
 
 - [ ] I have read the [Contributing Guidelines](../CONTRIBUTING.md)
-- [ ] This targets **core functionality** used by the majority of users (niche features belong in [rxSkills](https://github.com/Rxscientist/rxSkills))
+- [ ] This targets **core functionality** used by the majority of users (niche features belong in [rxSkills](https://github.com/Ar1haraNaN7mI/rxSkills))
 - [ ] I have added/updated tests where applicable
 - [ ] `uv run ruff check .` passes
 - [ ] `uv run pytest` passes

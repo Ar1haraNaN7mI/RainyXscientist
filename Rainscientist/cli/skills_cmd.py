@@ -152,7 +152,7 @@ def _cmd_install_skills(args: str = "") -> None:
     import questionary
     from questionary import Choice
 
-    from ..paths import GLOBAL_SKILLS_DIR, USER_SKILLS_DIR
+    from ..paths import GLOBAL_SKILLS_DIR, SKILLS_MARKETPLACE_REPO, USER_SKILLS_DIR
     from ..tools.skills_manager import fetch_remote_skill_index, install_skill
     from .interactive import _PICKER_STYLE
 
@@ -193,7 +193,7 @@ def _cmd_install_skills(args: str = "") -> None:
     except Exception as e:
         console.print(f"[red]Failed to fetch skill index: {e}[/red]")
         console.print(
-            "[dim]Try installing directly: /install-skill Rxscientist/rxSkills@skills[/dim]"
+            f"[dim]Try installing directly: /install-skill {SKILLS_MARKETPLACE_REPO}@skills[/dim]"
         )
         console.print()
         return

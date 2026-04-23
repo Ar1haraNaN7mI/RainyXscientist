@@ -67,6 +67,14 @@ MEMORIES_DIR: Path = (
 )
 MEMORY_DIR = MEMORIES_DIR  # backward compat alias
 
+# Default GitHub owner/repo for remote skill index and MCP marketplace YAML
+# (shallow clone; expects ``skills/`` and ``mcp/`` like EvoSkills). Override with
+# ``Rxscientist_SKILLS_MARKETPLACE_REPO``.
+SKILLS_MARKETPLACE_REPO: str = (
+    (os.environ.get("Rxscientist_SKILLS_MARKETPLACE_REPO") or "").strip()
+    or "Ar1haraNaN7mI/rxSkills"
+)
+
 
 # DEPRECATED(0.1.0): remove this migration helper and its call site below.
 def migrate_legacy_sessions_db() -> None:

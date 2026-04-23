@@ -314,7 +314,7 @@ def install_skill(
             except Exception:
                 pass
 
-            # If not local and not a GitHub URL, try remote lookup in rxSkills
+            # If not local and not a GitHub URL, try remote lookup in marketplace repo
             # This handles /install-skill skill-name shorthand
             try:
                 index = fetch_remote_skill_index()
@@ -639,7 +639,7 @@ _REMOTE_INDEX_TTL = 600  # 10 minutes
 
 
 def fetch_remote_skill_index(
-    repo: str = "Rxscientist/rxSkills",
+    repo: str | None = None,
     ref: str | None = None,
     path: str = "skills",
 ) -> list[dict]:
@@ -650,13 +650,14 @@ def fetch_remote_skill_index(
     Results are cached for 10 minutes.
 
     Args:
-        repo: GitHub repo in owner/repo format.
+        repo: GitHub repo in owner/repo format (default: ``paths.SKILLS_MARKETPLACE_REPO``).
         ref: Branch or tag (None for default branch).
         path: Subdirectory containing skills.
 
     Returns:
         List of dicts with keys: name, description, tags, install_source.
     """
+    repo = repo or paths.SKILLS_MARKETPLACE_REPO
     cache_key = f"{repo}:{ref or 'default'}:{path}"
     now = time.monotonic()
     cached = _REMOTE_INDEX_CACHE.get(cache_key)

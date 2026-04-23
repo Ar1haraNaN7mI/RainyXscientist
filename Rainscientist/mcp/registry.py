@@ -1,11 +1,12 @@
-"""MCP server registry — marketplace index from rxSkills.
+"""MCP server registry — marketplace index from the skills marketplace repo.
 
 Provides MCP server definitions used by:
 - ``/install-mcp`` (interactive browser and direct install)
 - ``rxsci onboard`` (initial setup wizard, filters by ``onboarding`` tag)
 - ``rxsci mcp install`` (CLI command)
 
-Server definitions live in ``rxSkills/mcp/`` as individual YAML files.
+Server definitions live in ``<repo>/mcp/`` as individual YAML files
+(see ``paths.SKILLS_MARKETPLACE_REPO`` for the default clone target).
 """
 
 from __future__ import annotations
@@ -23,6 +24,8 @@ from dataclasses import dataclass, field
 from pathlib import Path
 
 import yaml
+
+from ..paths import SKILLS_MARKETPLACE_REPO
 
 logger = logging.getLogger(__name__)
 
@@ -380,7 +383,7 @@ def _resolve_command_path(command: str) -> str:
 
 
 # =============================================================================
-# Marketplace index (YAML files in rxSkills/mcp/)
+# Marketplace index (YAML files in <marketplace>/mcp/)
 # =============================================================================
 
 _MARKETPLACE_CACHE: dict[str, tuple[float, list[MCPServerEntry]]] = {}
@@ -452,15 +455,16 @@ def _scan_mcp_dir(mcp_root: Path) -> list[MCPServerEntry]:
 
 
 def fetch_marketplace_index(
-    repo: str = "Rxscientist/rxSkills",
+    repo: str | None = None,
     ref: str | None = None,
     path: str = "mcp",
 ) -> list[MCPServerEntry]:
     """Fetch MCP server definitions from the marketplace.
 
-    Shallow-clones the rxSkills repo and scans ``{path}/*.yaml``.
+    Shallow-clones the marketplace repo and scans ``{path}/*.yaml``.
     Results are cached for 10 minutes.
     """
+    repo = repo or SKILLS_MARKETPLACE_REPO
     cache_key = f"{repo}:{ref or 'default'}:{path}"
     now = time.monotonic()
     cached = _MARKETPLACE_CACHE.get(cache_key)

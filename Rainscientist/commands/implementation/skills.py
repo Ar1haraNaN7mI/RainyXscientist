@@ -151,7 +151,7 @@ class InstallSkills(Command):
     async def execute(self, ctx: CommandContext, args: list[str]) -> None:
         from pathlib import Path as _Path
 
-        from ...paths import USER_SKILLS_DIR
+        from ...paths import SKILLS_MARKETPLACE_REPO, USER_SKILLS_DIR
         from ...tools.skills_manager import fetch_remote_skill_index, install_skill
 
         tag = args[0] if args else ""
@@ -164,7 +164,7 @@ class InstallSkills(Command):
         except Exception as e:
             ctx.ui.append_system(f"Failed to fetch skill index: {e}", style="red")
             ctx.ui.append_system(
-                "Try: /install-skill Rxscientist/rxSkills@skills", style="dim"
+                f"Try: /install-skill {SKILLS_MARKETPLACE_REPO}@skills", style="dim"
             )
             return
 
