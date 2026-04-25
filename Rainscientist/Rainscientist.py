@@ -19,7 +19,6 @@ Usage:
 
 import json
 import logging
-import os
 from datetime import datetime
 from pathlib import Path
 
@@ -28,7 +27,11 @@ from langchain.agents.middleware import AgentMiddleware
 from . import paths as _paths_mod
 from .config import apply_config_to_env, get_effective_config
 from .paths import set_active_workspace, set_workspace_root
-from .prompts import RESEARCHER_INSTRUCTIONS, _get_execution_environment_prompt, get_system_prompt
+from .prompts import (
+    RESEARCHER_INSTRUCTIONS,
+    _get_execution_environment_prompt,
+    get_system_prompt,
+)
 
 # Suppress noisy warnings from deepagents skill loader (non-string frontmatter fields, etc.)
 logging.getLogger("deepagents.middleware.skills").setLevel(logging.ERROR)
