@@ -284,9 +284,8 @@ def _normalize_windows_command(command: str) -> str:
         return f'powershell -NoProfile -Command "{ps}"'
 
     if cmd == "touch" and args:
-        ps = (
-            "New-Item -ItemType File -Force -Path "
-            + " ".join(_powershell_quote(a) for a in args)
+        ps = "New-Item -ItemType File -Force -Path " + " ".join(
+            _powershell_quote(a) for a in args
         )
         return f'powershell -NoProfile -Command "{ps}"'
 
@@ -655,10 +654,7 @@ class CustomSandboxBackend(LocalShellBackend):
         # Enhance timeout errors with actionable recovery guidance
         if response.exit_code == 124:
             response = ExecuteResponse(
-                output=(
-                    f"{response.output}\n\n"
-                    f"{_timeout_recovery_guidance(command)}"
-                ),
+                output=(f"{response.output}\n\n{_timeout_recovery_guidance(command)}"),
                 exit_code=response.exit_code,
                 truncated=response.truncated,
             )
