@@ -222,6 +222,99 @@ def validate_command(command: str) -> str | None:
     return None
 
 
+def _is_windows() -> bool:
+    """Return True when running on Windows."""
+    return os.name == "nt"
+
+
+def _powershell_quote(arg: str) -> str:
+    """Quote a PowerShell argument conservatively."""
+    return "'" + arg.replace("'", "''") + "'"
+
+
+def _normalize_windows_command(command: str) -> str:
+    """Translate a few common POSIX commands to explicit PowerShell forms.
+
+    This reduces failure rates for smaller models that emit ``ls`` / ``cat`` /
+    ``pwd`` on Windows shells that do not provide those aliases.
+    """
+    if not _is_windows():
+        return command
+
+    stripped = command.strip()
+    if not stripped:
+        return command
+
+    # Only normalize simple single-segment commands. Complex shell syntax is
+    # left untouched to avoid changing semantics unexpectedly.
+    if re.search(r"[|;&]", stripped):
+        return command
+
+    try:
+        tokens = shlex.split(stripped, posix=False)
+    except ValueError:
+        tokens = stripped.split()
+    if not tokens:
+        return command
+
+    cmd = tokens[0].lower()
+    args = tokens[1:]
+
+    if cmd == "ls":
+        force = any(a in ("-a", "-la", "-al") for a in args)
+        paths = [a for a in args if not a.startswith("-")]
+        ps = "Get-ChildItem"
+        if force:
+            ps += " -Force"
+        if paths:
+            ps += " " + " ".join(_powershell_quote(p) for p in paths)
+        return f'powershell -NoProfile -Command "{ps}"'
+
+    if cmd == "cat":
+        ps = "Get-Content"
+        if args:
+            ps += " " + " ".join(_powershell_quote(a) for a in args)
+        return f'powershell -NoProfile -Command "{ps}"'
+
+    if cmd == "pwd" and not args:
+        return 'powershell -NoProfile -Command "Get-Location"'
+
+    if cmd == "which" and args:
+        ps = "Get-Command " + " ".join(_powershell_quote(a) for a in args)
+        return f'powershell -NoProfile -Command "{ps}"'
+
+    if cmd == "touch" and args:
+        ps = (
+            "New-Item -ItemType File -Force -Path "
+            + " ".join(_powershell_quote(a) for a in args)
+        )
+        return f'powershell -NoProfile -Command "{ps}"'
+
+    return command
+
+
+def _timeout_recovery_guidance(command: str) -> str:
+    """Return OS-specific timeout recovery guidance."""
+    cmd_words = command.split()
+    grep_hint = cmd_words[0] if cmd_words else "process"
+
+    if _is_windows():
+        return (
+            "Recovery: re-run in the background to avoid the sandbox timeout:\n"
+            f"  Start-Job -ScriptBlock {{ {command} *> .\\output.log }}\n"
+            "Then check progress: Get-Job\n"
+            "Read results: Get-Content .\\output.log"
+        )
+
+    bg_cmd = f"{command} > /output.log 2>&1 &"
+    return (
+        "Recovery: re-run in background to avoid the sandbox timeout:\n"
+        f"  {bg_cmd}\n"
+        f"Then check progress: ps aux | grep {grep_hint}\n"
+        "Read results: cat /output.log"
+    )
+
+
 def convert_virtual_paths_in_command(
     command: str,
     workspace_name: str | None = None,
@@ -543,6 +636,10 @@ class CustomSandboxBackend(LocalShellBackend):
                 workspace_name=Path(str(self.cwd)).name,
             )
 
+        # Normalize common POSIX command habits on Windows to explicit
+        # PowerShell commands before validation/execution.
+        command = _normalize_windows_command(command)
+
         # Validate command safety (after path sanitization)
         error = validate_command(command)
         if error:
@@ -557,16 +654,10 @@ class CustomSandboxBackend(LocalShellBackend):
 
         # Enhance timeout errors with actionable recovery guidance
         if response.exit_code == 124:
-            cmd_words = command.split()
-            grep_hint = cmd_words[0] if cmd_words else "process"
-            bg_cmd = f"{command} > /output.log 2>&1 &"
             response = ExecuteResponse(
                 output=(
                     f"{response.output}\n\n"
-                    f"Recovery: re-run in background to avoid the sandbox timeout:\n"
-                    f"  {bg_cmd}\n"
-                    f"Then check progress: ps aux | grep {grep_hint}\n"
-                    f"Read results: cat /output.log"
+                    f"{_timeout_recovery_guidance(command)}"
                 ),
                 exit_code=response.exit_code,
                 truncated=response.truncated,

@@ -50,7 +50,7 @@ class RxscientistConfig:
         openai_api_key: OpenAI API key for GPT models.
         nvidia_api_key: NVIDIA API key for NVIDIA models.
         google_api_key: Google API key for Gemini models.
-        tavily_api_key: Tavily API key for web search.
+        tavily_api_key: Optional Tavily API key used as a fallback web-search backend.
         provider: Default LLM provider ('anthropic', 'openai', 'google-genai', or 'nvidia').
         model: Default model name (short name or full ID).
         default_mode: Default workspace mode ('daemon' or 'run').

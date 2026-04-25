@@ -1,5 +1,8 @@
 """Prompt templates for the Rxscientist experimental agent."""
 
+import os
+import platform
+
 # =============================================================================
 # Main agent workflow
 # =============================================================================
@@ -16,6 +19,16 @@ into reproducible experiments and a paper-ready experimental report.
 - Delegate aggressively using the `task` tool. Prefer the research sub-agent for web search.
 - Use local skills when they match the task. Your available skills are listed in the system prompt — read the relevant `SKILL.md` for full instructions.
   All skills are available under `/skills/`.
+
+## Tool Calling Discipline
+- Treat tool calls as deliberate actions. Think first, then call the minimum tool needed for the current step.
+- Follow each tool's argument schema exactly. Use the documented argument names and do not invent extra fields.
+- Never repeat the exact same failing tool call more than once. If a call fails, change the arguments or switch strategy.
+- If two attempts to the same tool still fail, stop retrying blindly and explain the blocker or choose a different tool.
+- Prefer one focused tool call at a time on smaller models. Do not queue multiple speculative retries.
+- For web search, start with one precise query, inspect the results, then refine only if something important is missing.
+- For shell execution, send one command string that is valid for the current operating system and shell.
+- When paths are involved, prefer relative workspace paths and avoid invented absolute system paths.
 
 ## Research Lifecycle (when applicable)
 For end-to-end research projects, the recommended skill sequence is:
@@ -192,33 +205,45 @@ When using the `execute` tool for shell commands:
 **Sandbox limits**: Commands time out after 300 seconds (exit code 124) and output is
 truncated at 100 KB. Plan accordingly.
 
-**Short commands** (< 30 seconds): Run directly
-```bash
-python script.py
-pip install pandas
+**Command format discipline**
+- Match the current OS and shell exactly. Do not assume Bash on Windows.
+- Use command names that are normal for the current shell, not generic Linux habits.
+- Keep commands simple. Avoid complex pipelines unless they are clearly necessary.
+- If you are unsure about the environment, inspect it first instead of guessing.
+
+**Windows / PowerShell examples**
+```powershell
+python .\\script.py
+Get-ChildItem
+Get-Content .\\output.log
+Get-Location
+Select-String -Pattern "TODO" .\\src\\*.py
 ```
 
-**Long-running commands** (> 30 seconds): Run in background, then check results
+**macOS / Linux examples**
 ```bash
-# Step 1: Start in background, redirect output to log
-python long_task.py > /output.log 2>&1 &
-
-# Step 2: Check if still running
-ps aux | grep long_task
-
-# Step 3: Read results when done
-cat /output.log
+python ./script.py
+ls
+cat ./output.log
+pwd
+grep -R "TODO" ./src
 ```
+
+**Long-running commands**
+- If a command is likely to exceed 30 seconds, prefer background execution and log files.
+- On Windows, prefer PowerShell-native background patterns such as `Start-Job` or `Start-Process`.
+- On macOS/Linux, use standard background execution with redirected logs.
 
 **Before heavy compute**: Estimate runtime. If likely > 5 minutes, use background
 execution from the start. If GPU memory is uncertain, start with a small test run
 (1 epoch, small batch) before the full run.
 
-**After a timeout (exit code 124)**: Do NOT re-run the same command. Instead:
+**After a timeout (exit code 124)**: Do NOT re-run the same command unchanged. Instead:
 1. Re-launch in background with output logging
 2. Or reduce the workload (fewer epochs, smaller model, subset of data)
+3. Or inspect whether the command used the wrong shell syntax for the current platform
 
-This prevents blocking the conversation during long operations.
+This prevents blocking the conversation during long operations and reduces repeated shell mistakes.
 """
 
 # =============================================================================
@@ -291,6 +316,7 @@ After each stage, ask: "Would a critical reviewer accept this evidence?"
 # =============================================================================
 
 RESEARCHER_INSTRUCTIONS = """You are a research assistant. Today's date is {date}.
+{execution_environment}
 
 ## Task
 Use tools to gather information on the assigned topic (methods, baselines,
@@ -302,9 +328,12 @@ Capture evaluation protocols (splits, metrics, calibration) and known failure mo
 ## Available Tools
 - `think_tool` — Reflect on findings and plan next steps
 - `read_file` — Read skill instructions when a skill matches the task (paths shown in your available skills listing)
-- Optionally, some web search tools to find information online.
+- `tavily_search` - General web search tool. It uses DDGS by default and does not require a search API key in the normal path.
 
-**CRITICAL:** Use `think_tool` after each search
+**CRITICAL**
+- Use `think_tool` after each search
+- Do not repeat the exact same search query after a weak result. Refine the query instead.
+- Keep tool arguments simple and exact. For search, the main argument is the user query string.
 
 ## Research Strategy
 1. Read the question carefully
@@ -356,7 +385,56 @@ def get_system_prompt() -> str:
     date = datetime.now().strftime("%Y-%m-%d")
     return (
         f"Today's date is {date}.\n\n"
+        + _get_execution_environment_prompt()
+        + "\n\n"
         + EXPERIMENT_WORKFLOW
         + "\n"
         + DELEGATION_STRATEGY
     )
+
+
+def _get_execution_environment_prompt() -> str:
+    """Return a concise runtime-specific OS and shell guide."""
+    system = platform.system() or "Unknown"
+    shell = _detect_shell(system)
+
+    if system.lower().startswith("win"):
+        return (
+            "Current execution environment:\n"
+            "- Operating system: Windows\n"
+            f"- Preferred shell: {shell}\n"
+            "- Use Windows/PowerShell-compatible commands.\n"
+            "- Prefer: Get-ChildItem, Get-Content, Get-Location, Set-Location, "
+            "Select-String, Copy-Item, Move-Item, Remove-Item, New-Item, Test-Path.\n"
+            "- Do not assume Bash utilities or Bash job-control syntax are available.\n"
+            "- If you need shell execution, write one valid Windows command string."
+        )
+
+    return (
+        "Current execution environment:\n"
+        f"- Operating system: {system}\n"
+        f"- Preferred shell: {shell}\n"
+        "- Use POSIX-compatible shell commands.\n"
+        "- Prefer: ls, cat, pwd, cd, grep, find, cp, mv, rm.\n"
+        "- Keep commands simple, relative to the workspace, and valid for the active shell."
+    )
+
+
+def _detect_shell(system_name: str) -> str:
+    """Best-effort shell detection for prompt guidance."""
+    shell = (os.environ.get("SHELL", "") or "").strip()
+    if shell:
+        return os.path.basename(shell)
+
+    if system_name.lower().startswith("win"):
+        for key in ("POWERSHELL_DISTRIBUTION_CHANNEL", "PSModulePath"):
+            if os.environ.get(key):
+                return "PowerShell"
+        comspec = (os.environ.get("COMSPEC", "") or "").lower()
+        if "powershell" in comspec:
+            return "PowerShell"
+        if "cmd.exe" in comspec:
+            return "cmd.exe"
+        return "PowerShell"
+
+    return "sh"

@@ -28,7 +28,7 @@ from langchain.agents.middleware import AgentMiddleware
 from . import paths as _paths_mod
 from .config import apply_config_to_env, get_effective_config
 from .paths import set_active_workspace, set_workspace_root
-from .prompts import RESEARCHER_INSTRUCTIONS, get_system_prompt
+from .prompts import RESEARCHER_INSTRUCTIONS, _get_execution_environment_prompt, get_system_prompt
 
 # Suppress noisy warnings from deepagents skill loader (non-string frontmatter fields, etc.)
 logging.getLogger("deepagents.middleware.skills").setLevel(logging.ERROR)
@@ -163,6 +163,7 @@ def _build_prompt_refs() -> dict:
     return {
         "RESEARCHER_INSTRUCTIONS": RESEARCHER_INSTRUCTIONS.format(
             date=datetime.now().strftime("%Y-%m-%d"),
+            execution_environment=_get_execution_environment_prompt(),
         ),
     }
 
@@ -172,10 +173,11 @@ def _build_base_kwargs(base_backend, base_middleware):
     from .tools import skill_manager, tavily_search, think_tool
     from .utils import load_subagents
 
-    tool_registry = {"think_tool": think_tool}
-    if os.environ.get("TAVILY_API_KEY"):
-        tool_registry["tavily_search"] = tavily_search
-    base_tools = [think_tool, skill_manager]
+    tool_registry = {
+        "think_tool": think_tool,
+        "tavily_search": tavily_search,
+    }
+    base_tools = [think_tool, skill_manager, tavily_search]
 
     subs = load_subagents(
         SUBAGENTS_CONFIG,
@@ -208,10 +210,11 @@ def load_mcp_and_build_kwargs(base_backend, base_middleware):
     if not mcp_by_agent:
         return _build_base_kwargs(base_backend, base_middleware)
 
-    tool_registry = {"think_tool": think_tool}
-    if os.environ.get("TAVILY_API_KEY"):
-        tool_registry["tavily_search"] = tavily_search
-    base_tools = [think_tool, skill_manager]
+    tool_registry = {
+        "think_tool": think_tool,
+        "tavily_search": tavily_search,
+    }
+    base_tools = [think_tool, skill_manager, tavily_search]
 
     # Fresh tool registry — start from base tools + MCP tools
     registry = dict(tool_registry)

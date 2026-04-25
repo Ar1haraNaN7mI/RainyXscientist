@@ -1,27 +1,106 @@
 """Web search tools.
 
-Provides ``tavily_search`` and ``fetch_webpage_content`` for the research agent,
-using Tavily for URL discovery and fetching full webpage content.
+Provides ``tavily_search`` and ``fetch_webpage_content`` for the research agent.
+Despite the legacy tool name, the default search backend is DDGS (DuckDuckGo),
+with Tavily used only as an optional fallback when configured.
 """
 
 import asyncio
+import os
 from typing import Annotated, Literal
 
 import httpx
 from langchain_core.tools import InjectedToolArg, tool
 from markdownify import markdownify
-from tavily import TavilyClient
 
-# Lazy initialization - only create client when needed
+# Lazy initialization - only create clients when needed
 _tavily_client = None
 
 
-def _get_tavily_client() -> TavilyClient:
+def _get_tavily_client():
     """Get or create the Tavily client (lazy initialization)."""
     global _tavily_client
     if _tavily_client is None:
+        from tavily import TavilyClient
+
         _tavily_client = TavilyClient()
     return _tavily_client
+
+
+def _ddgs_search(query: str, max_results: int) -> list[dict[str, str]]:
+    """Search with DDGS and normalize results."""
+    try:
+        from ddgs import DDGS
+    except ImportError as exc:
+        raise RuntimeError(
+            "DDGS is not installed. Install the `ddgs` package to enable default web search."
+        ) from exc
+
+    with DDGS() as client:
+        raw_results = list(client.text(query, max_results=max_results))
+
+    normalized: list[dict[str, str]] = []
+    for item in raw_results:
+        url = item.get("href") or item.get("url") or ""
+        if not url:
+            continue
+        normalized.append(
+            {
+                "title": item.get("title") or url,
+                "url": url,
+                "snippet": item.get("body") or item.get("snippet") or "",
+            }
+        )
+    return normalized
+
+
+def _tavily_search_results(
+    query: str, max_results: int, topic: Literal["general", "news", "finance"]
+) -> list[dict[str, str]]:
+    """Search with Tavily and normalize results."""
+    raw_results = _get_tavily_client().search(
+        query,
+        max_results=max_results,
+        topic=topic,
+    )
+    normalized: list[dict[str, str]] = []
+    for item in raw_results.get("results", []):
+        url = item.get("url", "")
+        if not url:
+            continue
+        normalized.append(
+            {
+                "title": item.get("title") or url,
+                "url": url,
+                "snippet": item.get("content") or item.get("snippet") or "",
+            }
+        )
+    return normalized
+
+
+def _search_with_fallback(
+    query: str,
+    max_results: int,
+    topic: Literal["general", "news", "finance"],
+) -> tuple[str, list[dict[str, str]], list[str]]:
+    """Search with DDGS first, then Tavily fallback when available."""
+    errors: list[str] = []
+    try:
+        return "ddgs", _ddgs_search(query, max_results=max_results), errors
+    except Exception as exc:
+        errors.append(f"DDGS error: {exc!s}")
+
+    if os.environ.get("TAVILY_API_KEY"):
+        try:
+            return (
+                "tavily-fallback",
+                _tavily_search_results(query, max_results=max_results, topic=topic),
+                errors,
+            )
+        except Exception as exc:
+            errors.append(f"Tavily fallback error: {exc!s}")
+
+    return "none", [], errors
 
 
 async def fetch_webpage_content(url: str, timeout: float = 10.0) -> str:
@@ -61,8 +140,14 @@ async def tavily_search(
 ) -> str:
     """Search the web for information on a given query.
 
-    Uses Tavily to discover relevant URLs, then fetches and returns
-    full webpage content as markdown for comprehensive research.
+    Default backend: DDGS (DuckDuckGo search, no API key required).
+    Optional fallback: Tavily when ``TAVILY_API_KEY`` is configured.
+    The tool name stays ``tavily_search`` for backward compatibility, but
+    new calls should treat it as the project's general web search tool.
+
+    Use one focused query at a time. Prefer short, precise queries over
+    repeated retries. If a previous search already failed, change the query
+    meaningfully instead of repeating the exact same call.
 
     Args:
         query: Search query to execute
@@ -71,41 +156,43 @@ async def tavily_search(
         Formatted search results with full webpage content in markdown
     """
 
-    def _sync_search() -> dict:
-        return _get_tavily_client().search(
-            query,
-            max_results=max_results,
-            topic=topic,
-        )
-
     try:
-        # Run Tavily search asynchronously
-        search_results = await asyncio.to_thread(_sync_search)
-
-        # Fetch full content for each URL concurrently
-        results = search_results.get("results", [])
+        engine, results, errors = await asyncio.to_thread(
+            _search_with_fallback,
+            query,
+            max_results,
+            topic,
+        )
         if not results:
-            return f"No results found for '{query}'"
+            joined_errors = "\n".join(errors) if errors else "No search results found."
+            return f"Search failed for '{query}'.\n{joined_errors}"
 
-        # Fetch all webpages concurrently
+        # Fetch all webpages concurrently. If page fetch fails, fall back to snippet.
         fetch_tasks = [fetch_webpage_content(r["url"]) for r in results]
         contents = await asyncio.gather(*fetch_tasks)
 
-        # Format results
         result_texts = []
         for result, content in zip(results, contents, strict=False):
+            rendered_content = content
+            if rendered_content.startswith("Error fetching content from"):
+                snippet = result.get("snippet", "").strip()
+                rendered_content = snippet or rendered_content
             result_text = f"""## {result["title"]}
 **URL:** {result["url"]}
 
-{content}
+{rendered_content}
 
 ---
 """
             result_texts.append(result_text)
 
-        return f"""Found {len(result_texts)} result(s) for '{query}':
+        errors_block = ""
+        if errors:
+            errors_block = "\n\nSearch backend notes:\n- " + "\n- ".join(errors)
 
-{"".join(result_texts)}"""
+        return f"""Found {len(result_texts)} result(s) for '{query}' via {engine}:
+
+{"".join(result_texts)}{errors_block}"""
 
     except Exception as e:
         return f"Search failed: {e!s}"

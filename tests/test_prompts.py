@@ -40,6 +40,15 @@ class TestGetSystemPrompt:
     def test_shell_guidelines_mention_background(self):
         assert "background" in EXPERIMENT_WORKFLOW.lower()
 
+    def test_contains_environment_guidance(self):
+        result = get_system_prompt()
+        assert "Current execution environment" in result
+        assert "Preferred shell" in result
+
+    def test_contains_tool_calling_discipline(self):
+        assert "Tool Calling Discipline" in EXPERIMENT_WORKFLOW
+        assert "Never repeat the exact same failing tool call" in EXPERIMENT_WORKFLOW
+
     def test_contains_todays_date(self):
         from datetime import datetime
 

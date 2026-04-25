@@ -8,6 +8,8 @@ from pathlib import Path
 import pytest
 from Rxscientist.backends import (
     CustomSandboxBackend,
+    _normalize_windows_command,
+    _timeout_recovery_guidance,
     convert_virtual_paths_in_command,
     validate_command,
 )
@@ -80,6 +82,34 @@ class TestConvertVirtualPaths:
     def test_root_only(self):
         result = convert_virtual_paths_in_command("ls /")
         assert result == "ls ."
+
+
+class TestWindowsCommandNormalization:
+    def test_windows_ls_converts_to_powershell(self, monkeypatch):
+        import Rxscientist.backends as backends_mod
+
+        monkeypatch.setattr(backends_mod.os, "name", "nt", raising=False)
+        result = _normalize_windows_command("ls -a src")
+        assert "powershell -NoProfile -Command" in result
+        assert "Get-ChildItem -Force" in result
+        assert "'src'" in result
+
+    def test_windows_cat_converts_to_powershell(self, monkeypatch):
+        import Rxscientist.backends as backends_mod
+
+        monkeypatch.setattr(backends_mod.os, "name", "nt", raising=False)
+        result = _normalize_windows_command("cat .\\output.log")
+        assert "powershell -NoProfile -Command" in result
+        assert "Get-Content" in result
+
+    def test_windows_timeout_guidance_uses_powershell_terms(self, monkeypatch):
+        import Rxscientist.backends as backends_mod
+
+        monkeypatch.setattr(backends_mod.os, "name", "nt", raising=False)
+        result = _timeout_recovery_guidance("python long_task.py")
+        assert "Start-Job" in result
+        assert "Get-Job" in result
+        assert "Get-Content" in result
 
     def test_no_change_relative(self):
         result = convert_virtual_paths_in_command("python main.py")

@@ -80,6 +80,9 @@ code-agent:
     - If a relevant local skill exists, read its SKILL.md and follow its workflow instead of reinventing.
     - Check `/memory/experiment-memory.md` for proven strategies from past cycles before implementing.
       Skip if the file does not exist yet.
+    - Do not assume Linux shell syntax. If the runtime is Windows, prefer PowerShell-style commands
+      such as `Get-ChildItem`, `Get-Content`, `Get-Location`, and `Select-String`.
+    - Avoid blind retries when a tool call or shell command fails. Change the arguments or explain the blocker.
     - Before heavy runs, confirm GPU/CUDA/VRAM availability and required packages.
     - Suggested preflight commands:
       - nvidia-smi
@@ -105,6 +108,9 @@ debug-agent:
     - Provide how to reproduce and how to verify the fix.
     - Do not modify /skills/.
     - If a relevant local skill exists, read its SKILL.md and use it as a diagnostic checklist.
+    - Do not assume Linux shell syntax. If the runtime is Windows, prefer PowerShell-style commands
+      and avoid Bash-only control syntax.
+    - If a shell command fails, do not repeat the exact same command unchanged.
 
     When responding, include:
     - Root cause
@@ -125,6 +131,7 @@ data-analysis-agent:
     - Save figures/tables under /artifacts/ (recommended) and reference paths.
     - Summarize insights and provide 1-3 recommended next experiments.
     - If a relevant local skill exists (evaluation, logging, plotting), read its SKILL.md and follow it.
+    - Do not assume Linux shell syntax. If you need shell commands on Windows, prefer PowerShell-style commands.
     - Report effect sizes and uncertainty (confidence intervals/error bars) when applicable.
     - Apply multiple-testing corrections when comparing many conditions.
     - Distinguish exploratory vs confirmatory findings.
