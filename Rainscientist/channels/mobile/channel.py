@@ -1,11 +1,13 @@
 from __future__ import annotations
 
+import asyncio
 import json
 import logging
 import mimetypes
+import socket
 import uuid
 from collections import defaultdict, deque
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import datetime
 from pathlib import Path
 from typing import Any
@@ -28,6 +30,8 @@ class MobileConfig(BaseChannelConfig):
     token: str = ""
     public_base_url: str = ""
     text_chunk_limit: int = 32_000
+    broadcast_port: int = 8766
+    broadcast_interval: float = 2.0
 
 
 @dataclass
@@ -47,6 +51,7 @@ class MobileChannel(Channel):
         super().__init__(config)
         self._runner: web.AppRunner | None = None
         self._site: web.TCPSite | None = None
+        self._broadcast_task: asyncio.Task | None = None
         self._clients: dict[web.WebSocketResponse, _ClientState] = {}
         self._uploads: dict[str, dict[str, Any]] = {}
         self._files: dict[str, dict[str, Any]] = {}
@@ -74,8 +79,17 @@ class MobileChannel(Channel):
             self.config.host,
             self.config.port,
         )
+        self._broadcast_task = asyncio.create_task(self._udp_broadcast_loop())
 
     async def _cleanup(self) -> None:
+        if self._broadcast_task is not None:
+            self._broadcast_task.cancel()
+            try:
+                await self._broadcast_task
+            except asyncio.CancelledError:
+                pass
+            self._broadcast_task = None
+
         clients = list(self._clients.keys())
         for ws in clients:
             try:
@@ -270,6 +284,30 @@ class MobileChannel(Channel):
             self._clients.pop(ws, None)
 
         return ws
+
+    async def _udp_broadcast_loop(self) -> None:
+        payload = json.dumps({
+            "service": "rxsci-mobile",
+            "name": "RxSci Mobile Channel",
+            "version": "1",
+            "port": self.config.port,
+            "ws_path": "/mobile/ws",
+        }).encode("utf-8")
+
+        sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        sock.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
+        sock.setblocking(False)
+        try:
+            while True:
+                try:
+                    sock.sendto(payload, ("255.255.255.255", self.config.broadcast_port))
+                except OSError as exc:
+                    logger.debug("UDP broadcast send error: %s", exc)
+                await asyncio.sleep(self.config.broadcast_interval)
+        except asyncio.CancelledError:
+            pass
+        finally:
+            sock.close()
 
     async def _handle_discover(self, request: web.Request) -> web.StreamResponse:
         base_url = self.config.public_base_url.strip().rstrip("/")
