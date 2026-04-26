@@ -41,6 +41,7 @@ from .mcp_ui import (
     _mcp_remove_server,
     _show_mcp_config,
 )
+from .process_cleanup import release_old_rxsci_processes
 from .tui_runtime import run_streaming
 
 # =============================================================================
@@ -695,6 +696,10 @@ def serve(
     if debug:
         _configure_logging()
 
+    released = release_old_rxsci_processes(config)
+    if released:
+        console.print(f"[dim]Released {released} old RxSci process(es).[/dim]")
+
     # Auto-start ccproxy if any provider uses OAuth mode
     _ccproxy_proc_serve = None
     if config.anthropic_auth_mode == "oauth" or config.openai_auth_mode == "oauth":
@@ -1195,6 +1200,10 @@ def _main_callback(
 
     config = get_effective_config(cli_overrides)
     apply_config_to_env(config)
+
+    released = release_old_rxsci_processes(config)
+    if released:
+        console.print(f"[dim]Released {released} old RxSci process(es).[/dim]")
 
     # Auto-start ccproxy if any provider uses OAuth mode
     _ccproxy_proc = None

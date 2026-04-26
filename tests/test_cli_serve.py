@@ -19,6 +19,7 @@ def _make_config(
     auto_approve: bool = False,
     auto_mode: bool = False,
     enable_ask_user: bool = True,
+    release_old_rxsci_on_start: bool = True,
 ):
     return SimpleNamespace(
         channel_enabled=channel_enabled,
@@ -29,6 +30,7 @@ def _make_config(
         auto_approve=auto_approve,
         auto_mode=auto_mode,
         enable_ask_user=enable_ask_user,
+        release_old_rxsci_on_start=release_old_rxsci_on_start,
         provider="anthropic",
         anthropic_auth_mode="api_key",
         openai_auth_mode="api_key",
@@ -70,6 +72,10 @@ def _run_serve_once(
     def _fake_channels_stop():
         captured["stopped"] = True
 
+    def _fake_release_old_rxsci_processes(cfg):
+        captured["release_config"] = cfg
+        return 0
+
     class _InterruptQueue:
         """A fake queue whose get() immediately raises KeyboardInterrupt."""
 
@@ -84,6 +90,11 @@ def _run_serve_once(
     )
     monkeypatch.setattr(commands, "_channels_stop", _fake_channels_stop)
     monkeypatch.setattr(commands, "_message_queue", _InterruptQueue())
+    monkeypatch.setattr(
+        commands,
+        "release_old_rxsci_processes",
+        _fake_release_old_rxsci_processes,
+    )
 
     def _fake_get_effective_config(cli_overrides=None):
         captured["cli_overrides"] = dict(cli_overrides or {})
@@ -106,6 +117,15 @@ def _run_serve_once(
         ask_user=ask_user,
     )
     return order, captured
+
+
+def test_serve_releases_old_rxsci_processes_before_start(monkeypatch, tmp_path):
+    ws = str((tmp_path / "ws").resolve())
+    config = _make_config(default_workdir=ws)
+
+    _, captured = _run_serve_once(monkeypatch, config, workdir=ws)
+
+    assert captured["release_config"].default_workdir == ws
 
 
 def test_serve_workdir_has_highest_priority_and_sets_root_before_ensure(

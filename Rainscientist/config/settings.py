@@ -217,6 +217,9 @@ class RxscientistConfig:
     # ccproxy
     ccproxy_port: int = 8000
 
+    # CLI lifecycle
+    release_old_rxsci_on_start: bool = True
+
     # STT (Speech-to-Text) Settings
     stt_enabled: bool = False
     stt_language: str = "auto"  # "auto" | "zh" | "en"
@@ -395,6 +398,7 @@ _ENV_MAPPINGS = {
     "reasoning_effort": "Rxscientist_REASONING_EFFORT",
     "channel_debug_tracing": "Rxscientist_CHANNEL_DEBUG_TRACING",
     "ccproxy_port": "Rxscientist_CCPROXY_PORT",
+    "release_old_rxsci_on_start": "Rxscientist_RELEASE_OLD_ON_START",
     "use_responses_api": "Rxscientist_USE_RESPONSES_API",
 }
 
