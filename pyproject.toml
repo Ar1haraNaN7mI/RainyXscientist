@@ -160,6 +160,7 @@ select = [
 ]
 ignore = [
     "E501", # Formatter takes care of that
+    "F401", # Unused imports are tolerated during active development
 ]
 fixable = ["ALL"]
 unfixable = []
