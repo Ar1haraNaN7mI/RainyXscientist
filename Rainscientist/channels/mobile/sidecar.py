@@ -93,6 +93,18 @@ async def _serve(host: str, port: int, token: str, broadcast_port: int):
 
             if payload.get("type") == "ping":
                 await ws.send_json({"type": "pong"})
+            elif payload.get("type") == "send_message":
+                await ws.send_json(
+                    {
+                        "type": "error",
+                        "message": (
+                            "mobile channel is not enabled; start RxSci with "
+                            "channel_enabled=mobile"
+                        ),
+                    }
+                )
+            else:
+                await ws.send_json({"type": "error", "message": "unknown message type"})
 
         return ws
 

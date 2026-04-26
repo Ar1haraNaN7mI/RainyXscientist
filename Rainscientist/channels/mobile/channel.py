@@ -443,7 +443,20 @@ class MobileChannel(Channel):
             message_id=str(payload.get("client_message_id", "")).strip() or uuid.uuid4().hex,
             metadata=metadata,
         )
-        await self._enqueue_raw(raw)
+        inbound = await self._build_inbound_async(raw)
+        if inbound is None:
+            await ws.send_json({"type": "error", "message": "message rejected"})
+            return
+        if self._bus is not None:
+            await self._bus.publish_inbound(inbound)
+        else:
+            await self._queue.put(inbound)
+        logger.info(
+            "Mobile message accepted from %s in %s: %s",
+            client.client_id,
+            chat_id,
+            text[:80],
+        )
         await ws.send_json(
             {
                 "type": "accepted",

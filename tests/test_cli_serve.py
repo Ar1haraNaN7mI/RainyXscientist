@@ -3,13 +3,15 @@
 from __future__ import annotations
 
 import os
-from types import SimpleNamespace
+import sys
+from types import ModuleType, SimpleNamespace
 
 from Rxscientist.cli import commands
 
 
 def _make_config(
     *,
+    channel_enabled: str = "telegram",
     default_workdir: str = "",
     channel_send_thinking: bool = True,
     log_level: str = "warning",
@@ -19,7 +21,7 @@ def _make_config(
     enable_ask_user: bool = True,
 ):
     return SimpleNamespace(
-        channel_enabled="telegram",
+        channel_enabled=channel_enabled,
         default_workdir=default_workdir,
         channel_send_thinking=channel_send_thinking,
         log_level=log_level,
@@ -205,6 +207,32 @@ def test_serve_debug_sets_log_level_and_channel_trace(monkeypatch, tmp_path):
         "channel_debug_tracing": True,
     }
     assert configure_calls == [("DEBUG", "true")]
+
+
+def test_serve_skips_mobile_sidecar_when_mobile_channel_enabled(
+    monkeypatch,
+    tmp_path,
+):
+    ws = str((tmp_path / "ws").resolve())
+    config = _make_config(channel_enabled="mobile", default_workdir=ws)
+    fake_sidecar = ModuleType("Rxscientist.channels.mobile.sidecar")
+    called = False
+
+    def _fail_start(_config):
+        nonlocal called
+        called = True
+        raise AssertionError("mobile sidecar should not start")
+
+    fake_sidecar.start_mobile_sidecar = _fail_start
+    monkeypatch.setitem(
+        sys.modules,
+        "Rxscientist.channels.mobile.sidecar",
+        fake_sidecar,
+    )
+
+    _run_serve_once(monkeypatch, config, workdir=ws)
+
+    assert called is False
 
 
 def test_serve_auto_approve_only_sets_auto_approve(monkeypatch, tmp_path):

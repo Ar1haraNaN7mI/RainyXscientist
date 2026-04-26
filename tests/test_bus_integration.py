@@ -12,6 +12,11 @@ from Rxscientist.channels.base import Channel, OutgoingMessage
 from Rxscientist.channels.bus.events import InboundMessage
 from Rxscientist.channels.bus.message_bus import MessageBus
 from Rxscientist.channels.channel_manager import ChannelManager
+from Rxscientist.channels.mobile.channel import (
+    MobileChannel,
+    MobileConfig,
+    _ClientState,
+)
 
 from tests.conftest import run_async as _run
 
@@ -248,6 +253,47 @@ class TestBusInboundConsumer:
                 await consumer
             except asyncio.CancelledError:
                 pass
+
+        _run(_test())
+
+    def test_mobile_send_message_publishes_directly_to_bus(self):
+        """Mobile WS send_message should immediately reach the bus."""
+
+        class FakeWebSocket:
+            def __init__(self):
+                self.sent = []
+
+            async def send_json(self, payload):
+                self.sent.append(payload)
+
+        async def _test():
+            bus = MessageBus()
+            channel = MobileChannel(MobileConfig(token="token"))
+            channel.set_bus(bus)
+            ws = FakeWebSocket()
+            channel._clients[ws] = _ClientState(
+                client_id="android-1",
+                device_name="Android",
+                connected_at="now",
+            )
+
+            await channel._handle_send_message(
+                ws,
+                {
+                    "type": "send_message",
+                    "session_id": "mobile:chat-1",
+                    "content": "hello from phone",
+                    "client_message_id": "client-msg-1",
+                },
+            )
+
+            inbound = await asyncio.wait_for(bus.consume_inbound(), timeout=1.0)
+            assert inbound.channel == "mobile"
+            assert inbound.sender_id == "android-1"
+            assert inbound.chat_id == "chat-1"
+            assert inbound.content == "hello from phone"
+            assert inbound.metadata["client_message_id"] == "client-msg-1"
+            assert ws.sent[-1]["type"] == "accepted"
 
         _run(_test())
 

@@ -1211,18 +1211,24 @@ def _main_callback(
             console.print(f"[red]{exc}[/red]")
             raise typer.Exit(1) from exc
 
-    # Auto-start mobile sidecar so the Android app can always discover this host
-    try:
-        from ..channels.mobile.sidecar import start_mobile_sidecar
+    enabled_channels = {
+        item.strip().lower()
+        for item in (config.channel_enabled or "").split(",")
+        if item.strip()
+    }
+    if "mobile" not in enabled_channels:
+        # Auto-start mobile sidecar so the Android app can always discover this host
+        try:
+            from ..channels.mobile.sidecar import start_mobile_sidecar
 
-        _mobile_token = start_mobile_sidecar(config)
-        if _mobile_token:
-            console.print(
-                f"[green]Mobile sidecar started on port {config.mobile_port or 8765}"
-                f" (token: {_mobile_token[:8]}…)[/green]"
-            )
-    except Exception as exc:
-        console.print(f"[yellow]Mobile sidecar failed: {exc}[/yellow]")
+            _mobile_token = start_mobile_sidecar(config)
+            if _mobile_token:
+                console.print(
+                    f"[green]Mobile sidecar started on port {config.mobile_port or 8765}"
+                    f" (token: {_mobile_token[:8]}...)[/green]"
+                )
+        except Exception as exc:
+            console.print(f"[yellow]Mobile sidecar failed: {exc}[/yellow]")
 
     show_thinking = config.show_thinking if not no_thinking else False
     effective_channel_thinking = config.channel_send_thinking and (not no_thinking)
