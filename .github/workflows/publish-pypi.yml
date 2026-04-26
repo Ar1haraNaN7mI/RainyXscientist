@@ -1,10 +1,3 @@
-# Publish to PyPI using trusted publishing (OIDC).
-# Resolves a non-conflicting patch version (PyPI forbids reusing the same file).
-# Run: Actions -> Publish PyPI -> Run workflow (default branch, usually main). Tags no longer
-# auto-publish; if you use tags, create an Actions release workflow separately.
-#
-# One-time: https://docs.pypi.org/trusted-publishers/
-
 name: Publish PyPI
 
 on:
@@ -50,8 +43,8 @@ jobs:
         if: success() && steps.v.outputs.bump_needed == 'true'
         run: |
           set -e
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git config user.name "never gonna give you up [bot]"
+          git config user.email "rick-astley@users.noreply.github.com"
           git add pyproject.toml
           if git diff --staged --quiet; then
             echo "No staged change; nothing to commit."
