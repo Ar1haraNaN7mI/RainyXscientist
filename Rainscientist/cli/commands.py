@@ -514,7 +514,7 @@ def _serve_process_message(
     """
     import asyncio
 
-    from .channel import _bus_loop
+    from .channel import _bus_loop, _manager
 
     console.print(
         f"[dim][{msg.channel_type}] {msg.sender}: {escape(msg.content[:80])}[/dim]"
@@ -542,6 +542,18 @@ def _serve_process_message(
                 ),
                 "Thinking",
             )
+        mobile = _manager.get_channel("mobile") if _manager else None
+        if mobile and msg.channel_type != "mobile":
+            _send_to_channel(
+                mobile.mirror_status_event(
+                    source_channel=msg.channel_type,
+                    chat_id=msg.chat_id,
+                    status_type="thinking",
+                    content=thinking,
+                    metadata=msg.metadata,
+                ),
+                "Mobile thinking",
+            )
 
     def _send_todo(items: list[dict]) -> None:
         from ..channels.consumer import _format_todo_list
@@ -555,6 +567,18 @@ def _serve_process_message(
                 ),
                 "Todo",
             )
+        mobile = _manager.get_channel("mobile") if _manager else None
+        if mobile and msg.channel_type != "mobile":
+            _send_to_channel(
+                mobile.mirror_status_event(
+                    source_channel=msg.channel_type,
+                    chat_id=msg.chat_id,
+                    status_type="todo",
+                    content=_format_todo_list(items),
+                    metadata=msg.metadata,
+                ),
+                "Mobile todo",
+            )
 
     def _send_media(file_path: str) -> None:
         if msg.channel_ref:
@@ -565,6 +589,18 @@ def _serve_process_message(
                     metadata=msg.metadata,
                 ),
                 "Media",
+                timeout=30,
+            )
+        mobile = _manager.get_channel("mobile") if _manager else None
+        if mobile and msg.channel_type != "mobile":
+            _send_to_channel(
+                mobile.mirror_media_event(
+                    source_channel=msg.channel_type,
+                    chat_id=msg.chat_id,
+                    file_path=file_path,
+                    metadata=msg.metadata,
+                ),
+                "Mobile media",
                 timeout=30,
             )
 

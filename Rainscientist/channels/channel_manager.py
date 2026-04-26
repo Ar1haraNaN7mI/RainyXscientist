@@ -862,6 +862,14 @@ class ChannelManager:
                 continue
 
             try:
+                mobile_channel = self._channels.get("mobile")
+                if (
+                    mobile_channel is not None
+                    and msg.channel != "mobile"
+                    and hasattr(mobile_channel, "mirror_outbound_event")
+                ):
+                    await mobile_channel.mirror_outbound_event(msg)
+
                 # Run outbound pipeline if available (formatting, etc.)
                 if msg.channel in self._outbound_pipelines:
                     processed = await self._outbound_pipelines[msg.channel].process(msg)

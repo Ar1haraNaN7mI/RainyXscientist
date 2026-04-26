@@ -1,0 +1,13 @@
+﻿# Minimal RxSci mobile channel config
+# Copy these keys into the output of `rxsci config path`, or apply them with `rxsci config set`.
+
+channel_enabled: "mobile"
+channel_send_thinking: true
+mobile_host: "0.0.0.0"
+mobile_port: 8765
+mobile_token: "change-me-to-a-long-random-token"
+mobile_allowed_senders: ""
+mobile_public_base_url: ""
+auto_approve: false
+auto_mode: false
+enable_ask_user: false

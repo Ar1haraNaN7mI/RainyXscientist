@@ -190,6 +190,13 @@ class RxscientistConfig:
     signal_allowed_senders: str = ""
     signal_rpc_port: int = 7583
 
+    # Mobile Channel Settings
+    mobile_host: str = "0.0.0.0"
+    mobile_port: int = 8765
+    mobile_token: str = ""
+    mobile_allowed_senders: str = ""
+    mobile_public_base_url: str = ""
+
     # Shared webhook port (0 = disabled)
     shared_webhook_port: int = 9000
 

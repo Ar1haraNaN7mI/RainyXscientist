@@ -218,3 +218,13 @@ IMESSAGE = ChannelCapabilities(
     reactions=False,  # imsg CLI cannot send tapback reactions
     chat_types=("direct", "group"),
 )
+
+MOBILE = ChannelCapabilities(
+    format_type="plain",
+    max_text_length=32_000,
+    typing=False,
+    media_send=True,
+    media_receive=True,
+    threading=True,
+    chat_types=("direct", "thread"),
+)

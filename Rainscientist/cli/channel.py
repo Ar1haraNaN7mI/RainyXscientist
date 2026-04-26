@@ -560,6 +560,12 @@ async def _handle_bus_message(bus, manager, msg) -> None:
         f"[bus] Received from {msg.channel}:{msg.sender_id}: {msg.content[:60]}..."
     )
     manager.record_message(msg.channel, "received")
+    mobile_channel = manager.get_channel("mobile")
+    if mobile_channel and hasattr(mobile_channel, "mirror_inbound_event"):
+        try:
+            await mobile_channel.mirror_inbound_event(msg)
+        except Exception as exc:
+            _channel_logger.debug("Mobile inbound mirror failed: %s", exc)
 
     channel = manager.get_channel(msg.channel)
     typing_active = False
