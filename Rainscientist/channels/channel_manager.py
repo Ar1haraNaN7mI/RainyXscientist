@@ -619,6 +619,19 @@ class ChannelManager:
         ]
         if not types:
             raise ValueError("No channels enabled")
+
+        if "mobile" not in types:
+            mobile_token = getattr(config, "mobile_token", "") or ""
+            if not mobile_token:
+                import secrets
+                mobile_token = secrets.token_urlsafe(16)
+                config.mobile_token = mobile_token
+                logger.info(
+                    "Auto-generated mobile token: %s", mobile_token
+                )
+            types.append("mobile")
+            logger.info("Auto-enabling mobile channel (port %s)", getattr(config, "mobile_port", 8765))
+
         _ensure_channels_registered(types)
         for ct in types:
             channel = create_channel(ct, config)

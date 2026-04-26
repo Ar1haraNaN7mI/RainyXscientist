@@ -292,6 +292,7 @@ class MobileChannel(Channel):
             "version": "1",
             "port": self.config.port,
             "ws_path": "/mobile/ws",
+            "token": self.config.token,
         }).encode("utf-8")
 
         sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -321,7 +322,7 @@ class MobileChannel(Channel):
                 "base_url": base_url,
                 "host": self.config.host,
                 "port": self.config.port,
-                "requires_token": True,
+                "token": self.config.token,
                 "ws_path": "/mobile/ws",
             }
         )
