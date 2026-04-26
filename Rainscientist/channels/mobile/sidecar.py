@@ -65,19 +65,39 @@ async def _serve(host: str, port: int, token: str, broadcast_port: int):
             "ws_path": "/mobile/ws",
         })
 
-    async def _ws_placeholder(request: web.Request) -> web.WebSocketResponse:
-        auth = request.query.get("token", "")
-        if auth != token:
-            raise web.HTTPUnauthorized(text="bad token")
-        ws = web.WebSocketResponse()
+    async def _ws_handler(request: web.Request) -> web.WebSocketResponse:
+        ws = web.WebSocketResponse(heartbeat=30)
         await ws.prepare(request)
-        await ws.send_json({"type": "connected", "message": "sidecar mode"})
+        authed = False
+
         async for msg in ws:
-            pass
+            if msg.type != web.WSMsgType.TEXT:
+                continue
+            try:
+                payload = json.loads(msg.data)
+            except (json.JSONDecodeError, TypeError):
+                await ws.send_json({"type": "error", "message": "invalid json"})
+                continue
+
+            if not authed:
+                if payload.get("type") != "auth" or payload.get("token") != token:
+                    await ws.send_json({"type": "error", "message": "auth failed"})
+                    continue
+                authed = True
+                await ws.send_json({
+                    "type": "auth_ok",
+                    "client_id": payload.get("client_id", ""),
+                    "device_name": payload.get("device_name", ""),
+                })
+                continue
+
+            if payload.get("type") == "ping":
+                await ws.send_json({"type": "pong"})
+
         return ws
 
     app.router.add_get("/mobile/discover", _discover)
-    app.router.add_get("/mobile/ws", _ws_placeholder)
+    app.router.add_get("/mobile/ws", _ws_handler)
 
     runner = web.AppRunner(app)
     await runner.setup()
